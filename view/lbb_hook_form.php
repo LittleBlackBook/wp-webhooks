@@ -1,5 +1,5 @@
-<div style="margin-top:20px;">
-	<form>
+<div style="margin-top:50px;">
+	<form class="hook-form">
 	  <input type="hidden" name="action" value="lbbhc_hit_url">
 		<select name="hook_for" class="form-control">
 		  <option value="""">Hook For</option>
@@ -18,10 +18,10 @@
 		<div class="urlParams">
 			<table class="appendUrlDiv">
 				<tr>
-					<td><input style="width:300px;" type="text" name='urlparms[key][]' placeholder="Key" class="urlkey"></td>
+					<td><input style="width:300px;" type="text" name='urlparams[key][]' placeholder="Key" class="urlkey"></td>
 					<td>
-					  <input style="width:300px;" type="text" name='urlparms[value][]' placeholder="Value" class="urlvalue">
-				    <input type="checkbox" name='urlparms[is_array][]' value="1" class="is_array">Is array
+					  <input style="width:300px;" type="text" name='urlparams[value][]' placeholder="Value" class="urlvalue">
+				    <input type="checkbox" name='urlparams[is_array][]' value="1" class="is_array">Is array
 					</td>
 				</tr>
 			</table>
@@ -62,7 +62,7 @@
 </div>
 <a style="cursor:pointer" onclick="jQuery('.headerResponse').show();jQuery('.bodyResponse').hide();">Headers</a>
 <a style="cursor:pointer" onclick="jQuery('.headerResponse').hide();jQuery('.bodyResponse').show();">Body</a>
-<div class="headerResponse" style="display:none">
+<div class="headerResponse" style="">
 	<table class="appendHeaderResponse">
 		<tr>
 			<td><textarea class="headerResponse" rows="4" cols="50"></textarea></td>

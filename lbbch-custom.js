@@ -12,7 +12,10 @@ jQuery(document).on("click",".sendHooksRequest",function(evt){
     data: serialized,
     success: function(data){
 			//var response = jQuery.parseJSON(data);
-      jQuery(".bodyResponse").val(data);
+		  var response = data.split("||||");
+      //console.log(response.header);
+			jQuery(".headerResponse").val(response[0]);
+			jQuery(".bodyResponse").val(response[1]);
     }
   });
 	
@@ -28,7 +31,7 @@ jQuery(document).on("click",".urlkey,.urlvalue",function(){
 		html += '</td>';
 		html += '<td>';
 		html += '<input style="width:300px;" type="text" name="urlparams[value][]" placeholder="Value" class="urlvalue">';
-		html += '<input type="checkbox" name="urlparms[is_array][]" value="1" class="is_array">Is array';
+		html += '<input type="checkbox" name="urlparams[is_array][]" value="1" class="is_array">Is array';
 		html += '</td>';
 		remove += '<td><a style="cursor:pointer" class="removeDiv">Remove</a></td>';
 		remove += '</tr>';

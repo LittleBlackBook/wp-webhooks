@@ -81,3 +81,7 @@ jQuery(document).on("click",".bodykey,.bodyvalue",function(){
 jQuery(document).on("click",".removeDiv",function(){
   jQuery(this).closest("tr").remove();
 })
+
+jQuery(document).on("click",".hookClick",function(){
+  var rel = jQuery(this).attr("rel");
+})

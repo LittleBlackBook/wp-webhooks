@@ -1,5 +1,11 @@
-<div style="margin-top:50px;">
-	<form class="hook-form">
+<a href="?page=lbbch-options" class="hookClick <?php if($tab == ''){echo 'active';}?>">Hooks</a>
+<a href="?page=lbbch-options&amp;tab=hook-logs" class="hookClick <?php if($tab == 'hook-logs'){echo 'active';}?>">Logs</a>
+<div style="margin-top:50px;" class="hookList">
+</div>
+
+<div class="hookForm">
+
+<form class="hook-form">
 	  <input type="hidden" name="action" value="lbbhc_hit_url">
 		<select name="hook_for" class="form-control">
 		  <option value="""">Hook For</option>
@@ -75,4 +81,6 @@
 			<td><textarea class="bodyResponse" rows="10" cols="70"></textarea></td>
 		</tr>
 	</table>
+</div>
+
 </div>

@@ -19,35 +19,73 @@ if ( is_admin() ){
 
 //Hook to add menu in admin panel
 function lbbch_admin_menu() {
-	global $rpco_settings_page;
-	$rpco_settings_page = add_submenu_page( 'options-general.php', 'Custom Hook', 'Custom Hook', 'manage_options', 'lbbch-options', 'lbbch_settings_page' );
+	add_menu_page('Wp Hook','Wp Hook','manage_options','lbbch-options','lbbch_settings_page' );
 }
 
-/**
- * Register API Javascript helpers.
- *
- * @see wp_register_scripts()
- */
- 
+//Register styles
+function lbbch_admin_style() {
+  wp_register_style( 'lbbch_style', esc_url_raw( plugins_url( 'lbbch-style.css', __FILE__ ) ),"", '1.1', SBIVER );
+  wp_enqueue_style( 'lbbch_style' );
+}
+add_action( 'admin_enqueue_scripts', 'lbbch_admin_style' );
+
+//Register scripts
 wp_enqueue_script( 'lbbch-custom', esc_url_raw( plugins_url( 'lbbch-custom.js', __FILE__ ) ),"", '1.1', true );
-wp_register_style( 'lbbch_style', esc_url_raw( plugins_url( 'lbbch-style.css', __FILE__ ) ),"", '1.1', SBIVER );
-wp_enqueue_style( 'lbbch_style' );
 
-
-//To render the menu dashboard page
+//Handle pages request
 function lbbch_settings_page(){
-  include "view/lbb_hook_form.php";
+	global $wpdb; // this is how you get access to the database
+	
+	$tab = $_GET["tab"];
+  switch ($tab) {
+    case "":
+      $data = $wpdb->get_results("SELECT * FROM ".$wpdb->prefix."hooks where status=1 and delete_status=0 order by id desc",ARRAY_A );
+      include "view/lbb_hook_list.php";
+      break;
+		case "hook-logs":
+		  $data = $wpdb->get_results("SELECT * FROM ".$wpdb->prefix."logs order by id desc",ARRAY_A );
+			include "view/lbb_hook_logs.php";
+      break;
+	  case "hook-form":
+			include "view/lbb_hook_form.php";
+      break;
+		case "edit-hook-form":
+		  $id = $_GET["id"];
+			if(empty($id)){
+				echo "Id is required";
+			}else{
+		    $result = $wpdb->get_row("SELECT * FROM ".$wpdb->prefix."hooks where id=".$id." and status=1 and delete_status=0",ARRAY_A);
+				if(empty($result))
+				{
+					echo "No result found with this hook id";
+				}else{
+				  include "view/lbb_edit_hook_form.php";
+				}
+			}
+      break;
+		case "delete-hook":
+		  $id = $_GET["id"];
+			$wpdb->delete( $wpdb->prefix."hooks", 
+		                 array("id" => $id)
+								   );
+			echo "<script>window.location.href='?page=lbbch-options'</script>";
+			exit;
+      break;
+    default:
+	}
+		
+	
 }
 
+//Hooks for adding data to database using ajax
 add_action('wp_ajax_lbbhc_hit_url', 'lbbhc_hit_url_callback');
 
-
-//Submitting the request
+//Submitting the request of new hook to database
 function lbbhc_hit_url_callback($url,$bodies,$headers) {
   global $wpdb; // this is how you get access to the database
 	//$form = json_decode($_REQUEST["form"]);
 	$request = $_REQUEST;
-	
+	$id      = !empty($request["id"]) ? $request["id"] : "";
 	//Parse the url params
 	$urlparams  = "";
 	$urlskey    = "";
@@ -130,12 +168,12 @@ function lbbhc_hit_url_callback($url,$bodies,$headers) {
 	}else{
 		$bodies = stripslashes($request["body-raw-value"]);
 	}
-	//die(); // this is required to return a proper result
-	//$headers    = json_encode($request["header"]);
-	//print_r($bodies);exit;
+	$bodyarray = json_encode(array("form-data" => $request["formdata_type"],"get" => $urlparams,"post" => $bodypost));
+	
 	$querystring = !empty($urlparams) ? "?".http_build_query($urlparams) : "";
 	$url        = $_REQUEST["url"].$querystring;
 	$ch         = curl_init();
+	
 	// set url
 	curl_setopt($ch, CURLOPT_URL, $url);
 	//return the transfer as a string
@@ -154,121 +192,150 @@ function lbbhc_hit_url_callback($url,$bodies,$headers) {
 	
 	// $output contains the output string
 	$output = curl_exec($ch);
+	$getinfo = curl_getinfo($ch);
 	curl_close($ch);
 	
 	$response = explode("\r\n\r\n", $output, 2);
 	$returnHeader = json_encode(get_headers_from_curl_response($response[0]));
 	$returnBody   = $response[1];
 	
-	$responseArray = array("header" => $returnHeader,"body" => $returnBody);
-	$bodyarray     = array("get" => $urlparams,"post" => $bodypost);
-
-	$wpdb->insert( $wpdb->prefix."hooks", array('hook_for'   => mysql_real_escape_string($_POST['hook_for']), 
-	                                            'call_type'  => mysql_real_escape_string($_POST['method']),
-																							'url'        => mysql_real_escape_string($_POST['url']),
-																							'data'       => mysql_real_escape_string(json_encode($bodyarray)),
-																							'headers'    => mysql_real_escape_string(json_encode($headers)),
-																							'response'   => mysql_real_escape_string(json_encode($responseArray)),
-																							) 
-			         );
-	echo $wpdb->last_query;exit;
+	if($getinfo["http_code"] == 200){
+		$responseArray = array("header" => $returnHeader,"body" => $returnBody);
+		if(!empty($id)){
+			$wpdb->update($wpdb->prefix."hooks",
+			              array('hook_for'  => stripslashes($_POST['hook_for']), 
+												 'call_type'  => stripslashes($_POST['method']),
+												 'url'        => stripslashes($_POST['url']),
+												 'data'       => stripslashes($bodyarray),
+												 'headers'    => stripslashes(json_encode($headers)),
+												 'response'   => json_encode($responseArray),
+												),
+										array( 'id' => $id ) 
+										);
+		}else{
+		//Insert hook data to table
+		$wpdb->insert( $wpdb->prefix."hooks", 
+		               array('hook_for'   => stripslashes($_POST['hook_for']), 
+												 'call_type'  => stripslashes($_POST['method']),
+												 'url'        => stripslashes($_POST['url']),
+												 'data'       => stripslashes($bodyarray),
+												 'headers'    => stripslashes(json_encode($headers)),
+												 'response'   => json_encode($responseArray),
+												) 
+								 );
+		}
+	}
+  $message           = "";
+	$message[0] = $returnHeader;
+	$message[1] = $returnBody;
+	
+	echo implode("||||",$message);
 	do_action ( "lbbhc_hit_url_callbacksas" );
 	die();
 }
 
 
-//Submitting the request
+//Hook function for post/page call
 function lbbhc_get_post_page() {
   global $wpdb; // this is how you get access to the database
 	//$form = json_decode($_REQUEST["form"]);
 	$request = $_REQUEST;
 	
-	$postdata    = $wpdb->get_row("SELECT * FROM ".$wpdb->prefix."hooks WHERE hook_for = '".$request["post_type"]."'");
-	$data        = json_decode($postdata->data,true);
-	$method      = strtoupper($postdata->call_type);
-	$headerdata  = json_decode($postdata->headers,true);
-	
-	$bodyGetData  = $data["get"];
-	$bodyPostData = $data["post"];
-	//Parse the url params
-	$urlparams  = "";
-	
-	if(!empty($bodyGetData)){
-		foreach($bodyGetData as $bodygetkey => $bodygetvalue){
-			if (strpos($bodygetvalue, '%%') !== false) {
-				$val   = trim(str_replace("%%","",$bodygetvalue));
-				$value = $_REQUEST[$val];
-				$data["data"]["get"][$bodygetkey] = $value;
-			}else{
-				$data["data"]["get"][$bodygetkey] = $bodygetvalue;
+	$resultdata    = $wpdb->get_results("SELECT * FROM ".$wpdb->prefix."hooks WHERE hook_for = '".$request["post_type"]."' and status=1 and delete_status=0",ARRAY_A);
+	foreach($resultdata as $postdata){
+		$data        = json_decode($postdata["data"],true);
+		$method      = strtoupper($postdata["call_type"]);
+		$headerdata  = json_decode($postdata["headers"],true);
+		
+		$bodyGetData  = $data["get"];
+		$bodyPostData = $data["post"];
+		//Parse the url params
+		$urlparams  = "";
+		
+		if(!empty($bodyGetData)){
+			foreach($bodyGetData as $bodygetkey => $bodygetvalue){
+				if (strpos($bodygetvalue, '%%') !== false) {
+					$val   = trim(str_replace("%%","",$bodygetvalue));
+					$value = $_REQUEST[$val];
+					$data["data"]["get"][$bodygetkey] = $value;
+				}else{
+					$data["data"]["get"][$bodygetkey] = $bodygetvalue;
+				}
+			}
+			$urlparams = $data["data"]["get"];
+		}
+		
+		$bodyparams  = "";
+		
+		if(!empty($bodyPostData)){
+			foreach($bodyPostData as $bodypostkey => $bodypostvalue){
+				if (strpos($bodypostvalue, '%%') !== false) {
+					$val   = trim(str_replace("%%","",$bodypostvalue));
+					$value = $_REQUEST[$val];
+					$data["data"]["post"][$bodypostkey] = $value;
+				}else{
+					$data["data"]["post"][$bodypostkey] = $bodypostvalue;
+				}
+				$bodyparams = $data["data"]["post"];
+				if($method == "POST"){
+					$bodyparams = json_encode($bodyparams);
+				}
 			}
 		}
-		$urlparams = $data["data"]["get"];
-	}
-	
-	$bodyparams  = "";
-	
-	if(!empty($bodyPostData)){
-		foreach($bodyPostData as $bodypostkey => $bodypostvalue){
-			if (strpos($bodypostvalue, '%%') !== false) {
-				$val   = trim(str_replace("%%","",$bodypostvalue));
-				$value = $_REQUEST[$val];
-				$data["data"]["post"][$bodypostkey] = $value;
-			}else{
-				$data["data"]["post"][$bodypostkey] = $bodypostvalue;
-			}
-			$bodyparams = $data["data"]["post"];
-		  if($method == "POST"){
-				$bodyparams = json_encode($bodyparams);
+		
+		//Parse the header params
+		$headers = "";
+		if(!empty($headerdata)){
+			foreach($headerdata as $headerkey => $headdervalue){
+				$headers[] = $headerkey.':'.$headdervalue;
 			}
 		}
-	}
-	
-	//Parse the header params
-	$headers = "";
-	if(!empty($headerdata)){
-		foreach($headerdata as $headerkey => $headdervalue){
-      $headers[] = $headerkey.':'.$headdervalue;
-		}
-	}
 
-	$querystring = !empty($urlparams) ? "?".http_build_query($urlparams) : "";
-	$url         = $postdata->url.$querystring;
-	$ch          = curl_init();
-	// set url
-	curl_setopt($ch, CURLOPT_URL, $url);
-	//return the transfer as a string
-	curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-	curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
-	//$headers[] = 'client_id: wpweb';
-	//$headers[] = 'client_secret: 5dfe726a08c37e7dab97f6d02041766ca6008a24231c3797bf94761a90a19d7b';
-	curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
-	curl_setopt($ch, CURLOPT_HEADER, true);
-	curl_setopt($ch, CURLOPT_CUSTOMREQUEST, $method);
-	
-	//print_r($bodies);exit;
-	if(isset($bodies) && $bodies != ''){
-		curl_setopt($ch, CURLOPT_POSTFIELDS, $bodyparams);
+		$querystring = !empty($urlparams) ? "?".http_build_query($urlparams) : "";
+		$url         = $postdata["url"].$querystring;
+		$ch          = curl_init();
+		// set url
+		curl_setopt($ch, CURLOPT_URL, $url);
+		//return the transfer as a string
+		curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+		curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+		//$headers[] = 'client_id: wpweb';
+		//$headers[] = 'client_secret: 5dfe726a08c37e7dab97f6d02041766ca6008a24231c3797bf94761a90a19d7b';
+		curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+		curl_setopt($ch, CURLOPT_HEADER, true);
+		curl_setopt($ch, CURLOPT_CUSTOMREQUEST, $method);
+		
+		//print_r($bodies);exit;
+		if(isset($bodies) && $bodies != ''){
+			curl_setopt($ch, CURLOPT_POSTFIELDS, $bodyparams);
+		}
+		
+		// $output contains the output string
+		$output  = curl_exec($ch);
+		$getinfo = curl_getinfo($ch);
+		curl_close($ch);
+		$response     = explode("\r\n\r\n", $output, 2);
+		$returnHeader = json_encode(get_headers_from_curl_response($response[0]));
+		$returnBody   = $response[1];
+		
+		//Insert hook data to table
+		$wpdb->insert( $wpdb->prefix."logs", 
+									 array(
+												 'hook_id'        => stripslashes($postdata['id']),
+												 'post_id'        => stripslashes($request["post_ID"]),
+												 'post_type'      => stripslashes($request["post_type"]),
+												 'response_code'  => stripslashes($getinfo["http_code"]),
+												 'date_added'     => date("Y-m-d H:i:s"),
+												 'response'       => $output,
+												) 
+									);
+		//do_action ( "lbbhc_hit_url_callbacksas" );
 	}
-	
-	// $output contains the output string
-	echo $output  = curl_exec($ch);exit;
-	$response     = explode("\r\n\r\n", $output, 2);
-	$returnHeader = json_encode(get_headers_from_curl_response($response[0]));
-	$returnBody   = $response[1];
-	
-	if($data["response"]["response_in"] == "body"){
-		echo "hi";exit;
-	}
-	
-	echo implode("||||",$message);
-	// close curl resource to free up system resources
-	curl_close($ch);
-	do_action ( "lbbhc_hit_url_callbacksas" );
+	return true;
 	//die();
 }
 
-
+//Convert headers data to array
 function get_headers_from_curl_response($response)
 {
     $headers = array();
@@ -284,5 +351,97 @@ function get_headers_from_curl_response($response)
 
     return $headers;
 }
+//Custom hooh when performing action with post/page
 add_action( 'transition_post_status', 'lbbhc_get_post_page', 10,3 );
+
+function response_codes($code)
+{
+	$http_codes = array(
+    100 => 'Continue',
+    101 => 'Switching Protocols',
+    102 => 'Processing',
+    200 => 'OK',
+    201 => 'Created',
+    202 => 'Accepted',
+    203 => 'Non-Authoritative Information',
+    204 => 'No Content',
+    205 => 'Reset Content',
+    206 => 'Partial Content',
+    207 => 'Multi-Status',
+    300 => 'Multiple Choices',
+    301 => 'Moved Permanently',
+    302 => 'Found',
+    303 => 'See Other',
+    304 => 'Not Modified',
+    305 => 'Use Proxy',
+    306 => 'Switch Proxy',
+    307 => 'Temporary Redirect',
+    400 => 'Bad Request',
+    401 => 'Unauthorized',
+    402 => 'Payment Required',
+    403 => 'Forbidden',
+    404 => 'Not Found',
+    405 => 'Method Not Allowed',
+    406 => 'Not Acceptable',
+    407 => 'Proxy Authentication Required',
+    408 => 'Request Timeout',
+    409 => 'Conflict',
+    410 => 'Gone',
+    411 => 'Length Required',
+    412 => 'Precondition Failed',
+    413 => 'Request Entity Too Large',
+    414 => 'Request-URI Too Long',
+    415 => 'Unsupported Media Type',
+    416 => 'Requested Range Not Satisfiable',
+    417 => 'Expectation Failed',
+    418 => 'I\'m a teapot',
+    422 => 'Unprocessable Entity',
+    423 => 'Locked',
+    424 => 'Failed Dependency',
+    425 => 'Unordered Collection',
+    426 => 'Upgrade Required',
+    449 => 'Retry With',
+    450 => 'Blocked by Windows Parental Controls',
+    500 => 'Internal Server Error',
+    501 => 'Not Implemented',
+    502 => 'Bad Gateway',
+    503 => 'Service Unavailable',
+    504 => 'Gateway Timeout',
+    505 => 'HTTP Version Not Supported',
+    506 => 'Variant Also Negotiates',
+    507 => 'Insufficient Storage',
+    509 => 'Bandwidth Limit Exceeded',
+    510 => 'Not Extended'
+  );
+	return $http_codes[$code];
+}
+//Activate plugin
+function lbbch_wp_activate() {
+	global $wpdb;
+	$wpdb->query("CREATE TABLE IF NOT EXISTS ".$wpdb->prefix."hooks (
+			`id` int(11) NOT NULL,
+			`hook_for` varchar(50) NOT NULL,
+			`call_type` varchar(10) NOT NULL,
+			`url` text NOT NULL,
+			`data` text NOT NULL,
+			`headers` text,
+			`response` text NOT NULL,
+			`status` int(11) NOT NULL DEFAULT '1',
+			`delete_status` int(11) NOT NULL DEFAULT '0'
+		) ENGINE=InnoDB DEFAULT CHARSET=latin1;");
+		$wpdb->query("ALTER TABLE `wp_hooks`
+      ADD PRIMARY KEY (`id`);");
+		$wpdb->query("ALTER TABLE `wp_hooks`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;");
+}
+register_activation_hook( __FILE__, 'lbbch_wp_activate' );
+
+//Deactivate plugin
+function lbbch_wp_deactivate() {
+	global $wpdb;
+	$wpdb->query( "DROP TABLE IF EXISTS ".$wpdb->prefix."hooks" );
+}
+
+register_deactivation_hook( __FILE__, 'lbbch_wp_deactivate' );
+
 ?>

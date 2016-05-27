@@ -39,12 +39,12 @@ function lbbch_settings_page(){
 	$tab = $_GET["tab"];
   switch ($tab) {
     case "":
-      $records  = $wpdb->get_results("SELECT * FROM ".$wpdb->prefix."web_hooks where status=1 and delete_status=0 order by id desc");
+      $records  = $wpdb->get_results("SELECT * FROM ".$wpdb->prefix."web_hooks where delete_status=0 order by id desc");
       $total    = count($records);
 			$per_page = 10;
 			$page     = isset( $_GET['cpage'] ) ? abs( (int) $_GET['cpage'] ) : 1;
 			$offset   = ( $page * $per_page ) - $per_page;
-			$data     = $wpdb->get_results("SELECT * FROM ".$wpdb->prefix."web_hooks where status=1 and delete_status=0 ORDER BY id desc LIMIT ${offset}, ${per_page}",ARRAY_A);
+			$data     = $wpdb->get_results("SELECT * FROM ".$wpdb->prefix."web_hooks where delete_status=0 ORDER BY id desc LIMIT ${offset}, ${per_page}",ARRAY_A);
 			include "view/lbb_hook_list.php";
       break;
 		case "hook-logs":
@@ -64,7 +64,7 @@ function lbbch_settings_page(){
 			if(empty($id)){
 				echo "Id is required";
 			}else{
-		    $result = $wpdb->get_row("SELECT * FROM ".$wpdb->prefix."web_hooks where id=".$id." and status=1 and delete_status=0",ARRAY_A);
+		    $result = $wpdb->get_row("SELECT * FROM ".$wpdb->prefix."web_hooks where id=".$id." and delete_status=0",ARRAY_A);
 				if(empty($result))
 				{
 					echo "No result found with this hook id";
@@ -72,6 +72,20 @@ function lbbch_settings_page(){
 				  include "view/lbb_edit_hook_form.php";
 				}
 			}
+      break;
+		case "change-status":
+			$id = $_GET["id"];
+			if($_GET["status"] == 1){
+			  $status =  0;
+			}else{
+				$status =  1;
+			}
+			$wpdb->update( $wpdb->prefix."web_hooks",
+                     array('status'  => $status), 
+											array( 'id' => $id ) 		
+								   );
+			echo "<script>window.location.href='?page=lbbch-options'</script>";
+			exit;
       break;
 		case "delete-hook":
 		  $id = $_GET["id"];

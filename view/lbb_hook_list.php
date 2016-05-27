@@ -30,7 +30,9 @@
 				<td><?php echo strtoupper($val["hook_for"]); ?></td>
 				<td><?php echo strtoupper($val["call_type"]); ?></td>
 				<td><?php echo $val["url"]; ?></td>
-				<td><?php echo $statusArray[$val["status"]]; ?></td>
+				<td style="color:<?php if($val["status"] == 1){echo "green";}else{echo "red";}?>"><?php echo $statusArray[$val["status"]]; ?>
+				<a href="?page=lbbch-options&amp;tab=change-status&id=<?php echo $val["id"]; ?>&status=<?php echo $val["status"]?>">Change</a>
+				</td>
 				<td>
 					<a href="?page=lbbch-options&amp;tab=edit-hook-form&id=<?php echo $val["id"];?>">Edit</a>
 					<a href="?page=lbbch-options&amp;tab=delete-hook&id=<?php echo $val["id"];?>">Delete</a>

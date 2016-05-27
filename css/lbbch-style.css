@@ -1,0 +1,26 @@
+.hook-form{
+}
+.wp_hook_container{
+	margin:20px;
+	font-size:14px;
+}
+.tabs{
+	background: #e3e3e3;
+  padding: 8px 30px;
+	color: #656464;
+}
+.tabs.active{
+  background: #A5A0A0;
+  color: #fff;
+}
+.tab-container{
+	margin-bottom:20px;
+}
+.addNewButton{
+	background: #0073aa;
+  color: #fff;
+  padding: 7px 22px;
+}
+.addNew{
+	margin-bottom:15px;
+}

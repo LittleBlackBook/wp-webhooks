@@ -31,7 +31,6 @@ jQuery(document).on("click",".urlkey,.urlvalue",function(){
 		html += '</td>';
 		html += '<td>';
 		html += '<input style="width:300px;" type="text" name="urlparams[value][]" placeholder="Value" class="urlvalue">';
-		html += '<input type="checkbox" name="urlparams[is_array][]" value="1" class="is_array">Is array';
 		html += '</td>';
 		remove += '<td><a style="cursor:pointer" class="removeDiv">Remove</a></td>';
 		remove += '</tr>';
@@ -50,7 +49,6 @@ jQuery(document).on("click",".headerkey,.headervalue",function(){
 		html += '</td>';
 		html += '<td>';
 		html += '<input style="width:300px;" type="text" name="header[value][]" placeholder="Value" class="headervalue">';
-		html += '<input type="checkbox" name="header[is_array][]" value="1" class="is_array">Is array';
 		html += '</td>';
 		remove += '<td><a style="cursor:pointer" class="removeDiv">Remove</a></td>';
 		remove += '</tr>';
@@ -84,4 +82,18 @@ jQuery(document).on("click",".removeDiv",function(){
 
 jQuery(document).on("click",".hookClick",function(){
   var rel = jQuery(this).attr("rel");
+})
+
+jQuery(document).on("click",".validateJson",function(){
+	var jsonInput   = jQuery(".raw-form-data-area");
+	var jsonResults = jQuery(".Validateresult");
+
+	jsonInput.validateJSON({
+		'onSuccess': function(json) {
+			jsonResults.removeClass('ui-state-error').html("<span style='color:green'>Valid JSON</span>");
+		},
+		'onError': function(error) {
+			jsonResults.addClass('ui-state-error').html(error.message || "<span style='color:red'>Invalid</span>");
+		}
+	});
 })

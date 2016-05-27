@@ -24,14 +24,14 @@ function lbbch_admin_menu() {
 
 //Register styles
 function lbbch_admin_style() {
-  wp_register_style( 'lbbch_style', esc_url_raw( plugins_url( 'lbbch-style.css', __FILE__ ) ),"", '1.1', SBIVER );
+  wp_register_style( 'lbbch_style', esc_url_raw( plugins_url( 'css/lbbch-style.css', __FILE__ ) ),"", '1.1', "all");
   wp_enqueue_style( 'lbbch_style' );
 }
 add_action( 'admin_enqueue_scripts', 'lbbch_admin_style' );
 
 //Register scripts
-wp_enqueue_script( 'lbbch-custom', esc_url_raw( plugins_url( 'lbbch-custom.js', __FILE__ ) ),"", '1.1', true );
-
+wp_enqueue_script( 'lbbch-custom', esc_url_raw( plugins_url( 'js/lbbch-custom.js', __FILE__ ) ),"", '1.1', true );
+wp_enqueue_script( 'jquery.validate-json', esc_url_raw( plugins_url( 'js/jquery.validate-json.js', __FILE__ ) ),"", '1.1', true );
 //Handle pages request
 function lbbch_settings_page(){
 	global $wpdb; // this is how you get access to the database
@@ -39,11 +39,21 @@ function lbbch_settings_page(){
 	$tab = $_GET["tab"];
   switch ($tab) {
     case "":
-      $data = $wpdb->get_results("SELECT * FROM ".$wpdb->prefix."hooks where status=1 and delete_status=0 order by id desc",ARRAY_A );
-      include "view/lbb_hook_list.php";
+      $records  = $wpdb->get_results("SELECT * FROM ".$wpdb->prefix."hooks where status=1 and delete_status=0 order by id desc");
+      $total    = count($records);
+			$per_page = 10;
+			$page     = isset( $_GET['cpage'] ) ? abs( (int) $_GET['cpage'] ) : 1;
+			$offset   = ( $page * $per_page ) - $per_page;
+			$data     = $wpdb->get_results("SELECT * FROM ".$wpdb->prefix."hooks where status=1 and delete_status=0 ORDER BY id desc LIMIT ${offset}, ${per_page}",ARRAY_A);
+			include "view/lbb_hook_list.php";
       break;
 		case "hook-logs":
-		  $data = $wpdb->get_results("SELECT * FROM ".$wpdb->prefix."logs order by id desc",ARRAY_A );
+		  $records  = $wpdb->get_results("SELECT * FROM ".$wpdb->prefix."logs order by id desc");
+			$total    = count($records);
+			$per_page = 10;
+			$page     = isset( $_GET['cpage'] ) ? abs( (int) $_GET['cpage'] ) : 1;
+			$offset   = ( $page * $per_page ) - $per_page;
+			$data     = $wpdb->get_results("SELECT * FROM ".$wpdb->prefix."logs ORDER BY id desc LIMIT ${offset}, ${per_page}",ARRAY_A);
 			include "view/lbb_hook_logs.php";
       break;
 	  case "hook-form":

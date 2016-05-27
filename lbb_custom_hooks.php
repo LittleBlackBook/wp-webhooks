@@ -39,21 +39,21 @@ function lbbch_settings_page(){
 	$tab = $_GET["tab"];
   switch ($tab) {
     case "":
-      $records  = $wpdb->get_results("SELECT * FROM ".$wpdb->prefix."hooks where status=1 and delete_status=0 order by id desc");
+      $records  = $wpdb->get_results("SELECT * FROM ".$wpdb->prefix."web_hooks where status=1 and delete_status=0 order by id desc");
       $total    = count($records);
 			$per_page = 10;
 			$page     = isset( $_GET['cpage'] ) ? abs( (int) $_GET['cpage'] ) : 1;
 			$offset   = ( $page * $per_page ) - $per_page;
-			$data     = $wpdb->get_results("SELECT * FROM ".$wpdb->prefix."hooks where status=1 and delete_status=0 ORDER BY id desc LIMIT ${offset}, ${per_page}",ARRAY_A);
+			$data     = $wpdb->get_results("SELECT * FROM ".$wpdb->prefix."web_hooks where status=1 and delete_status=0 ORDER BY id desc LIMIT ${offset}, ${per_page}",ARRAY_A);
 			include "view/lbb_hook_list.php";
       break;
 		case "hook-logs":
-		  $records  = $wpdb->get_results("SELECT * FROM ".$wpdb->prefix."logs order by id desc");
+		  $records  = $wpdb->get_results("SELECT * FROM ".$wpdb->prefix."web_logs order by id desc");
 			$total    = count($records);
-			$per_page = 10;
+			$per_page = 50;
 			$page     = isset( $_GET['cpage'] ) ? abs( (int) $_GET['cpage'] ) : 1;
 			$offset   = ( $page * $per_page ) - $per_page;
-			$data     = $wpdb->get_results("SELECT * FROM ".$wpdb->prefix."logs ORDER BY id desc LIMIT ${offset}, ${per_page}",ARRAY_A);
+			$data     = $wpdb->get_results("SELECT * FROM ".$wpdb->prefix."web_logs ORDER BY id desc LIMIT ${offset}, ${per_page}",ARRAY_A);
 			include "view/lbb_hook_logs.php";
       break;
 	  case "hook-form":
@@ -64,7 +64,7 @@ function lbbch_settings_page(){
 			if(empty($id)){
 				echo "Id is required";
 			}else{
-		    $result = $wpdb->get_row("SELECT * FROM ".$wpdb->prefix."hooks where id=".$id." and status=1 and delete_status=0",ARRAY_A);
+		    $result = $wpdb->get_row("SELECT * FROM ".$wpdb->prefix."web_hooks where id=".$id." and status=1 and delete_status=0",ARRAY_A);
 				if(empty($result))
 				{
 					echo "No result found with this hook id";
@@ -75,7 +75,7 @@ function lbbch_settings_page(){
       break;
 		case "delete-hook":
 		  $id = $_GET["id"];
-			$wpdb->delete( $wpdb->prefix."hooks", 
+			$wpdb->delete( $wpdb->prefix."web_hooks", 
 		                 array("id" => $id)
 								   );
 			echo "<script>window.location.href='?page=lbbch-options'</script>";
@@ -212,7 +212,7 @@ function lbbhc_hit_url_callback($url,$bodies,$headers) {
 	if($getinfo["http_code"] == 200){
 		$responseArray = array("header" => $returnHeader,"body" => $returnBody);
 		if(!empty($id)){
-			$wpdb->update($wpdb->prefix."hooks",
+			$wpdb->update($wpdb->prefix."web_hooks",
 			              array('hook_for'  => stripslashes($_POST['hook_for']), 
 												 'call_type'  => stripslashes($_POST['method']),
 												 'url'        => stripslashes($_POST['url']),
@@ -224,7 +224,7 @@ function lbbhc_hit_url_callback($url,$bodies,$headers) {
 										);
 		}else{
 		//Insert hook data to table
-		$wpdb->insert( $wpdb->prefix."hooks", 
+		$wpdb->insert( $wpdb->prefix."web_hooks", 
 		               array('hook_for'   => stripslashes($_POST['hook_for']), 
 												 'call_type'  => stripslashes($_POST['method']),
 												 'url'        => stripslashes($_POST['url']),
@@ -251,7 +251,7 @@ function lbbhc_get_post_page() {
 	//$form = json_decode($_REQUEST["form"]);
 	$request = $_REQUEST;
 	
-	$resultdata    = $wpdb->get_results("SELECT * FROM ".$wpdb->prefix."hooks WHERE hook_for = '".$request["post_type"]."' and status=1 and delete_status=0",ARRAY_A);
+	$resultdata    = $wpdb->get_results("SELECT * FROM ".$wpdb->prefix."web_hooks WHERE hook_for = '".$request["post_type"]."' and status=1 and delete_status=0",ARRAY_A);
 	foreach($resultdata as $postdata){
 		$data        = json_decode($postdata["data"],true);
 		$method      = strtoupper($postdata["call_type"]);
@@ -329,7 +329,7 @@ function lbbhc_get_post_page() {
 		$returnBody   = $response[1];
 		
 		//Insert hook data to table
-		$wpdb->insert( $wpdb->prefix."logs", 
+		$wpdb->insert( $wpdb->prefix."web_logs", 
 									 array(
 												 'hook_id'        => stripslashes($postdata['id']),
 												 'post_id'        => stripslashes($request["post_ID"]),
@@ -428,7 +428,8 @@ function response_codes($code)
 //Activate plugin
 function lbbch_wp_activate() {
 	global $wpdb;
-	$wpdb->query("CREATE TABLE IF NOT EXISTS ".$wpdb->prefix."hooks (
+	//Create hook table
+	$wpdb->query("CREATE TABLE IF NOT EXISTS ".$wpdb->prefix."web_hooks (
 			`id` int(11) NOT NULL,
 			`hook_for` varchar(50) NOT NULL,
 			`call_type` varchar(10) NOT NULL,
@@ -439,17 +440,33 @@ function lbbch_wp_activate() {
 			`status` int(11) NOT NULL DEFAULT '1',
 			`delete_status` int(11) NOT NULL DEFAULT '0'
 		) ENGINE=InnoDB DEFAULT CHARSET=latin1;");
-		$wpdb->query("ALTER TABLE `wp_hooks`
-      ADD PRIMARY KEY (`id`);");
-		$wpdb->query("ALTER TABLE `wp_hooks`
+	$wpdb->query("ALTER TABLE `wp_hooks`
+		ADD PRIMARY KEY (`id`);");
+	$wpdb->query("ALTER TABLE `wp_hooks`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;");
+	
+	//Create logs table
+	$wpdb->query("CREATE TABLE ".$wpdb->prefix."web_logs (
+		`id` int(11) NOT NULL,
+		`hook_id` int(11) NOT NULL,
+		`post_id` int(11) NOT NULL,
+		`post_type` varchar(20) DEFAULT NULL,
+		`response_code` int(11) NOT NULL,
+		`date_added` datetime DEFAULT NULL,
+		`response` text
+	) ENGINE=InnoDB DEFAULT CHARSET=latin1;");
+	$wpdb->query("ALTER TABLE ".$wpdb->prefix."web_logs
+    ADD PRIMARY KEY (`id`);");
+	$wpdb->query("ALTER TABLE ".$wpdb->prefix."web_logs
+    MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;");
 }
 register_activation_hook( __FILE__, 'lbbch_wp_activate' );
 
 //Deactivate plugin
 function lbbch_wp_deactivate() {
 	global $wpdb;
-	$wpdb->query( "DROP TABLE IF EXISTS ".$wpdb->prefix."hooks" );
+	$wpdb->query( "DROP TABLE IF EXISTS ".$wpdb->prefix."web_hooks" );
+	$wpdb->query( "DROP TABLE IF EXISTS ".$wpdb->prefix."web_logs" );
 }
 
 register_deactivation_hook( __FILE__, 'lbbch_wp_deactivate' );

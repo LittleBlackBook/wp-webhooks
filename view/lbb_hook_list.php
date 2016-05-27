@@ -10,16 +10,23 @@
 	  Add New Hook</a>
   </div>
 	<div>
-	<table>
+	<table class="wp_hooks_table">
+	  <col width="10%">
+		<col width="10%">
+		<col width="0%">
+		<col width="50%">
 		<tr>
+		  <th>Hook Id</th>
 			<th>Hook For</th>
 			<th>Call Type</th>
 			<th>URL</th>
 			<th>Status</th>
 			<th>Action</th>
 		</tr>
+		<?php if(!empty($data)){ ?>
 		<?php foreach($data as $key => $val){?>
 			<tr>
+			  <td><?php echo strtoupper($val["id"]); ?></td>
 				<td><?php echo strtoupper($val["hook_for"]); ?></td>
 				<td><?php echo strtoupper($val["call_type"]); ?></td>
 				<td><?php echo $val["url"]; ?></td>
@@ -29,7 +36,9 @@
 					<a href="?page=lbbch-options&amp;tab=delete-hook&id=<?php echo $val["id"];?>">Delete</a>
 				</td>
 			</tr>
-		<?php } ?>
+		<?php }} else{?>
+		<tr><td colspan=5>No Hook Found</td></tr>
+		<?php }?>
 	</table>
 	<?php
 	  echo paginate_links( array(

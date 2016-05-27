@@ -3,7 +3,7 @@
 		<a href="?page=lbbch-options" class="hookClick tabs <?php if($tab == ''){echo 'active';}?>">Hooks</a>
 		<a href="?page=lbbch-options&amp;tab=hook-logs" class="hookClick tabs <?php if($tab == 'hook-logs'){echo 'active';}?>">Logs</a>
 	</div>
-	<table>
+	<table class="wp_hooks_table">
 		<tr>
 			<th>Hook Id</th>
 			<th>Post Id</th>

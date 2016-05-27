@@ -53,7 +53,7 @@
 				<a style="cursor:pointer" class="tabs headerTab" 
 				onclick="jQuery('.headerParams').show();jQuery('.bodyParams').hide();jQuery('.bodyTab').removeClass('active');jQuery(this).addClass('active');"
 				>Headers</a>
-				<a style="cursor:pointer" class="tabs bodyTab" 
+				<a style="cursor:pointer" class="tabs bodyTab active" 
 				onclick="jQuery('.headerParams').hide();jQuery('.bodyParams').show();jQuery('.headerTab').removeClass('active');jQuery(this).addClass('active');">Body</a>
 			</div>
 			<div class="headerParams" style="display:none">

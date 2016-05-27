@@ -44,3 +44,6 @@
 .wp_hooks_table tr:last-child td{
 	border-bottom:0px;
 }
+.hook-form input[type="text"]{
+	height:34px;
+}

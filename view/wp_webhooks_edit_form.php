@@ -1,23 +1,23 @@
 <div class="wp_hook_container">
 	<div class="tab-container">
-		<a href="?page=lbbch-options" class="hookClick tabs <?php if($tab == ''){echo 'active';}?>">Hooks</a>
-		<a href="?page=lbbch-options&amp;tab=hook-logs" class="hookClick tabs <?php if($tab == 'hook-logs'){echo 'active';}?>">Logs</a>
+		<a href="?page=wp-webhooks-options" class="hookClick tabs <?php if($tab == ''){echo 'active';}?>">Hooks</a>
+		<a href="?page=wp-webhooks-options&amp;tab=hook-logs" class="hookClick tabs <?php if($tab == 'hook-logs'){echo 'active';}?>">Logs</a>
 	</div>
 	<div class="hookForm">
 		<form class="hook-form">
-			<input type="hidden" name="action" value="lbbhc_hit_url">
+			<input type="hidden" name="action" value="wp_webhooks_hit_url">
 			<input type="hidden" name="id" value="<?php echo $result['id'] ?>">
-			<div class="applied-on">
+			<div class="applied_div">
 			  <?php $applied = explode(",",trim($result["applied_on"]));?>
-				<br>
-			  <label>Applied On</label>
-				<input <?php if(in_array("publish",$applied)){echo "checked";}?> type="checkbox" name="applied_on[]" value="publish">Publish
-				<input <?php if(in_array("inherit",$applied)){echo "checked";}?> type="checkbox" name="applied_on[]" value="inherit">Inherit  
-				<input <?php if(in_array("pending",$applied)){echo "checked";}?> type="checkbox" name="applied_on[]" value="pending">Pending 
-				<input <?php if(in_array("private",$applied)){echo "checked";}?> type="checkbox" name="applied_on[]" value="private">Private 
-				<input <?php if(in_array("future",$applied)){echo "checked";}?> type="checkbox" name="applied_on[]" value="future">Future 
-				<input <?php if(in_array("draft",$applied)){echo "checked";}?> type="checkbox" name="applied_on[]" value="draft">Draft 
-				<input <?php if(in_array("trash",$applied)){echo "checked";}?> type="checkbox" name="applied_on[]" value="trash">Trash 
+			  <label>Applied On: </label>
+				<input type="checkbox" value="all" class="applied_on"><span>all</span>
+				<input <?php if(in_array("publish",$applied)){echo "checked";}?> type="checkbox" class="applied_on" name="applied_on[]" value="publish"><span>Publish</span>
+				<input <?php if(in_array("inherit",$applied)){echo "checked";}?> type="checkbox" class="applied_on" name="applied_on[]" value="inherit"><span>Inherit</span>
+				<input <?php if(in_array("pending",$applied)){echo "checked";}?> type="checkbox" class="applied_on" name="applied_on[]" value="pending"><span>Pending</span>
+				<input <?php if(in_array("private",$applied)){echo "checked";}?> type="checkbox" class="applied_on" name="applied_on[]" value="private"><span>Private</span>
+				<input <?php if(in_array("future",$applied)){echo "checked";}?> type="checkbox" class="applied_on" name="applied_on[]" value="future"><span>Future</span>
+				<input <?php if(in_array("draft",$applied)){echo "checked";}?> type="checkbox" class="applied_on" name="applied_on[]" value="draft"><span>Draft</span>
+				<input <?php if(in_array("trash",$applied)){echo "checked";}?> type="checkbox" class="applied_on" name="applied_on[]" value="trash"><span>Trash</span>
 			</div>
 			<select name="hook_for" class="form-control">
 				<option value="">Hook For</option>

@@ -1,20 +1,21 @@
 <div class="wp_hook_container">
 	<div class="tab-container">
-		<a href="?page=lbbch-options" class="hookClick tabs <?php if($tab == ''){echo 'active';}?>">Hooks</a>
-		<a href="?page=lbbch-options&amp;tab=hook-logs" class="hookClick tabs <?php if($tab == 'hook-logs'){echo 'active';}?>">Logs</a>
+		<a href="?page=wp-webhooks-options" class="hookClick tabs <?php if($tab == ''){echo 'active';}?>">Hooks</a>
+		<a href="?page=wp-webhooks-options&amp;tab=hook-logs" class="hookClick tabs <?php if($tab == 'hook-logs'){echo 'active';}?>">Logs</a>
 	</div>
 	<div class="hookForm">
 		<form class="hook-form">
-			<input type="hidden" name="action" value="lbbhc_hit_url">
-			<div>
-			  <label>Applied On</label>
-				<input type="checkbox" name="applied_on[]" value="Publish">Publish
-				<input type="checkbox" name="applied_on[]" value="inherit ">Inherit  
-				<input type="checkbox" name="applied_on[]" value="pending">Pending 
-				<input type="checkbox" name="applied_on[]" value="private">Private 
-				<input type="checkbox" name="applied_on[]" value="future">Future 
-				<input type="checkbox" name="applied_on[]" value="draft">Draft 
-				<input type="checkbox" name="applied_on[]" value="trash">Trash 
+			<input type="hidden" name="action" value="wp-webhooks_hit_url">
+			<div class="applied_div">
+			  <label>Applied On: </label>
+				<input type="checkbox" value="all" class="applied_on"><span>all</span>
+				<input type="checkbox" name="applied_on[]" class="applied_on" value="Publish"><span>Publish</span>
+				<input type="checkbox" name="applied_on[]" class="applied_on" value="inherit "><span>Inherit</span>
+				<input type="checkbox" name="applied_on[]" class="applied_on" value="pending"><span>Pending</span>
+				<input type="checkbox" name="applied_on[]" class="applied_on" value="private"><span>Private</span>
+				<input type="checkbox" name="applied_on[]" class="applied_on" value="future"><span>Future</span>
+				<input type="checkbox" name="applied_on[]" class="applied_on" value="draft"><span>Draft</span>
+				<input type="checkbox" name="applied_on[]" class="applied_on" value="trash"><span>Trash</span>
 			</div>
 			<select name="hook_for" class="form-control">
 				<option value="""">Hook For</option>
@@ -30,6 +31,7 @@
 			<input type="text" name="url" placeholder="URL" style="width:600px;">
 			<button type="button" class="sendHooksRequest">Send</button>
 			<br />
+			<div class="tab-container"><a style="cursor:pointer" class="tabs headerTab">Get</a></div>
 			<div class="urlParams">
 				<table class="appendUrlDiv">
 					<tr>
@@ -40,7 +42,6 @@
 					</tr>
 				</table>
 			</div>
-			<br />
 			<div class="tab-container">
 				<a style="cursor:pointer" class="tabs headerTab" 
 				onclick="jQuery('.headerParams').show();jQuery('.bodyParams').hide();jQuery('.bodyTab').removeClass('active');jQuery(this).addClass('active');"

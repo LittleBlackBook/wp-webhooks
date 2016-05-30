@@ -14,7 +14,8 @@
   color: #fff;
 }
 .tab-container{
-	margin-bottom:20px;
+	margin-bottom:10px;
+	margin-top:20px;
 }
 .addNewButton{
 	background: #0073aa;
@@ -23,6 +24,7 @@
 }
 .addNew{
 	margin-bottom:15px;
+	margin-top:25px;
 }
 .wp_hooks_table{
 	width:90%;
@@ -44,6 +46,28 @@
 .wp_hooks_table tr:last-child td{
 	border-bottom:0px;
 }
-.hook-form input[type="text"]{
-	height:34px;
+.hook-form input[type="text"],select{
+	height:34px !important;
+	padding:6px;
+}
+.hook-form select{
+	
+}
+.hook-heading{
+	font-size:18px;
+	margin:6px 0 10px 0;
+	text-decoration:underline;
+	font-weight:700;
+}
+.applied_div{
+	margin:12px 0;
+	margin-top: 25px;
+}
+.applied_div label{
+	font-size:16px;
+	font-weight:700;
+	margin:8px 15px 8px 0;
+}
+.applied_div  span{
+	margin-right:12px;
 }

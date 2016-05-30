@@ -1,11 +1,11 @@
 <div class="wp_hook_container">
   <div class="tab-container">
-		<a href="?page=lbbch-options" class="hookClick tabs <?php if($tab == ''){echo 'active';}?>">Hooks</a>
-		<a href="?page=lbbch-options&amp;tab=hook-logs" class="hookClick tabs <?php if($tab == 'hook-logs'){echo 'active';}?>">Logs</a>
+		<a href="?page=wp-webhooks-options" class="hookClick tabs <?php if($tab == ''){echo 'active';}?>">Hooks</a>
+		<a href="?page=wp-webhooks-options&amp;tab=hook-logs" class="hookClick tabs <?php if($tab == 'hook-logs'){echo 'active';}?>">Logs</a>
 	</div>
 	<div class="addNew">
 	<?php $statusArray = array("Inactive","Active"); ?>
-	<a href="?page=lbbch-options&amp;tab=hook-form" class="hookClick addNewButton 
+	<a href="?page=wp-webhooks-options&amp;tab=hook-form" class="hookClick addNewButton 
 	<?php if($tab == 'hook-form'){echo 'active';}?>">
 	  Add New Hook</a>
   </div>
@@ -31,11 +31,11 @@
 				<td><?php echo strtoupper($val["call_type"]); ?></td>
 				<td><?php echo $val["url"]; ?></td>
 				<td style="color:<?php if($val["status"] == 1){echo "green";}else{echo "red";}?>"><?php echo $statusArray[$val["status"]]; ?>
-				<a href="?page=lbbch-options&amp;tab=change-status&id=<?php echo $val["id"]; ?>&status=<?php echo $val["status"]?>">Change</a>
+				<a href="?page=wp-webhooks-options&amp;tab=change-status&id=<?php echo $val["id"]; ?>&status=<?php echo $val["status"]?>">Change</a>
 				</td>
 				<td>
-					<a href="?page=lbbch-options&amp;tab=edit-hook-form&id=<?php echo $val["id"];?>">Edit</a>
-					<a href="?page=lbbch-options&amp;tab=delete-hook&id=<?php echo $val["id"];?>">Delete</a>
+					<a href="?page=wp-webhooks-options&amp;tab=edit-hook-form&id=<?php echo $val["id"];?>">Edit</a>
+					<a href="?page=wp-webhooks-options&amp;tab=delete-hook&id=<?php echo $val["id"];?>">Delete</a>
 				</td>
 			</tr>
 		<?php }} else{?>

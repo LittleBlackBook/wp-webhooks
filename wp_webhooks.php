@@ -1,10 +1,10 @@
 <?php
 /**
- * @package Lbb_Custom_Hooks
+ * @package WP_Webhooks
  * @version 1.0
  */
 /*
-Plugin Name: Lbb Custom Hooks
+Plugin Name: WP Webhooks
 Plugin URI: http://wordpress.org/plugins/hello-dolly/
 Description: This plugin is used for signle page hooks for hitting urls.
 Author: Little Black Book(Jitendra Bansal)
@@ -13,63 +13,62 @@ Version: 1.0
 
 //Adding menu to admin panel
 if ( is_admin() ){
-	add_action( 'admin_menu', 'lbbch_admin_menu' );
-	//add_action( 'admin_init', 'lbbch_settings_init' );
+	add_action( 'admin_menu', 'wp_webhooks_admin_menu' );
 }
 
 //Hook to add menu in admin panel
-function lbbch_admin_menu() {
-	add_menu_page('Wp Hook','Wp Hook','manage_options','lbbch-options','lbbch_settings_page' );
+function wp_webhooks_admin_menu() {
+	add_menu_page('Wp Web Hook','Wp Web Hook','manage_options','wp-webhooks-options','wp_webhooks_settings_page' );
 }
 
 //Register styles
-function lbbch_admin_style() {
-  wp_register_style( 'lbbch_style', esc_url_raw( plugins_url( 'css/lbbch-style.css', __FILE__ ) ),"", '1.1', "all");
-  wp_enqueue_style( 'lbbch_style' );
+function wp_webhooks_admin_style() {
+  wp_register_style( 'wp_webhooks_style', esc_url_raw( plugins_url( 'css/wp-webhooks-style.css', __FILE__ ) ),"", '1.1', "all");
+  wp_enqueue_style( 'wp_webhooks_style' );
 }
-add_action( 'admin_enqueue_scripts', 'lbbch_admin_style' );
+add_action( 'admin_enqueue_scripts', 'wp_webhooks_admin_style' );
 
 //Register scripts
-wp_enqueue_script( 'lbbch-custom', esc_url_raw( plugins_url( 'js/lbbch-custom.js', __FILE__ ) ),"", '1.1', true );
+wp_enqueue_script( 'wp-webhooks-custom', esc_url_raw( plugins_url( 'js/wp-webhooks-custom.js', __FILE__ ) ),"", '1.1', true );
 wp_enqueue_script( 'jquery.validate-json', esc_url_raw( plugins_url( 'js/jquery.validate-json.js', __FILE__ ) ),"", '1.1', true );
 //Handle pages request
-function lbbch_settings_page(){
+function wp_webhooks_settings_page(){
 	global $wpdb; // this is how you get access to the database
 	
 	$tab = $_GET["tab"];
   switch ($tab) {
     case "":
-      $records  = $wpdb->get_results("SELECT * FROM ".$wpdb->prefix."web_hooks where delete_status=0 order by id desc");
+      $records  = $wpdb->get_results("SELECT * FROM ".$wpdb->prefix."webhooks where delete_status=0 order by id desc");
       $total    = count($records);
 			$per_page = 10;
 			$page     = isset( $_GET['cpage'] ) ? abs( (int) $_GET['cpage'] ) : 1;
 			$offset   = ( $page * $per_page ) - $per_page;
-			$data     = $wpdb->get_results("SELECT * FROM ".$wpdb->prefix."web_hooks where delete_status=0 ORDER BY id desc LIMIT ${offset}, ${per_page}",ARRAY_A);
-			include "view/lbb_hook_list.php";
+			$data     = $wpdb->get_results("SELECT * FROM ".$wpdb->prefix."webhooks where delete_status=0 ORDER BY id desc LIMIT ${offset}, ${per_page}",ARRAY_A);
+			include "view/wp_webhooks_list.php";
       break;
 		case "hook-logs":
-		  $records  = $wpdb->get_results("SELECT * FROM ".$wpdb->prefix."web_logs order by id desc");
+		  $records  = $wpdb->get_results("SELECT * FROM ".$wpdb->prefix."webhooks_logs order by id desc");
 			$total    = count($records);
 			$per_page = 50;
 			$page     = isset( $_GET['cpage'] ) ? abs( (int) $_GET['cpage'] ) : 1;
 			$offset   = ( $page * $per_page ) - $per_page;
-			$data     = $wpdb->get_results("SELECT * FROM ".$wpdb->prefix."web_logs ORDER BY id desc LIMIT ${offset}, ${per_page}",ARRAY_A);
-			include "view/lbb_hook_logs.php";
+			$data     = $wpdb->get_results("SELECT * FROM ".$wpdb->prefix."webhooks_logs ORDER BY id desc LIMIT ${offset}, ${per_page}",ARRAY_A);
+			include "view/wp_webhooks_logs.php";
       break;
 	  case "hook-form":
-			include "view/lbb_hook_form.php";
+			include "view/wp_webhooks_form.php";
       break;
 		case "edit-hook-form":
 		  $id = $_GET["id"];
 			if(empty($id)){
 				echo "Id is required";
 			}else{
-		    $result = $wpdb->get_row("SELECT * FROM ".$wpdb->prefix."web_hooks where id=".$id." and delete_status=0",ARRAY_A);
+		    $result = $wpdb->get_row("SELECT * FROM ".$wpdb->prefix."webhooks where id=".$id." and delete_status=0",ARRAY_A);
 				if(empty($result))
 				{
 					echo "No result found with this hook id";
 				}else{
-				  include "view/lbb_edit_hook_form.php";
+				  include "view/wp_webhooks_edit_form.php";
 				}
 			}
       break;
@@ -80,19 +79,19 @@ function lbbch_settings_page(){
 			}else{
 				$status =  1;
 			}
-			$wpdb->update( $wpdb->prefix."web_hooks",
+			$wpdb->update( $wpdb->prefix."webhooks",
                      array('status'  => $status), 
 											array( 'id' => $id ) 		
 								   );
-			echo "<script>window.location.href='?page=lbbch-options'</script>";
+			echo "<script>window.location.href='?page=wp-webhooks-options'</script>";
 			exit;
       break;
 		case "delete-hook":
 		  $id = $_GET["id"];
-			$wpdb->delete( $wpdb->prefix."web_hooks", 
+			$wpdb->delete( $wpdb->prefix."webhooks", 
 		                 array("id" => $id)
 								   );
-			echo "<script>window.location.href='?page=lbbch-options'</script>";
+			echo "<script>window.location.href='?page=wp-webhooks-options'</script>";
 			exit;
       break;
     default:
@@ -102,10 +101,10 @@ function lbbch_settings_page(){
 }
 
 //Hooks for adding data to database using ajax
-add_action('wp_ajax_lbbhc_hit_url', 'lbbhc_hit_url_callback');
+add_action('wp_ajax_wp_webhooks_hit_url', 'wp_webhooks_hit_url_callback');
 
 //Submitting the request of new hook to database
-function lbbhc_hit_url_callback($url,$bodies,$headers) {
+function wp_webhooks_hit_url_callback($url,$bodies,$headers) {
   global $wpdb; // this is how you get access to the database
 	//$form = json_decode($_REQUEST["form"]);
 	$request = $_REQUEST;
@@ -226,7 +225,7 @@ function lbbhc_hit_url_callback($url,$bodies,$headers) {
 	if($getinfo["http_code"] == 200){
 		$responseArray = array("header" => $returnHeader,"body" => $returnBody);
 		if(!empty($id)){
-			$wpdb->update($wpdb->prefix."web_hooks",
+			$wpdb->update($wpdb->prefix."webhooks",
 			              array('hook_for'  => stripslashes($_POST['hook_for']), 
 												 'call_type'  => stripslashes($_POST['method']),
 												 'url'        => stripslashes($_POST['url']),
@@ -239,7 +238,7 @@ function lbbhc_hit_url_callback($url,$bodies,$headers) {
 										);
 		}else{
 		//Insert hook data to table
-		$wpdb->insert( $wpdb->prefix."web_hooks", 
+		$wpdb->insert( $wpdb->prefix."webhooks", 
 		               array('hook_for'   => stripslashes($_POST['hook_for']), 
 												 'call_type'  => stripslashes($_POST['method']),
 												 'url'        => stripslashes($_POST['url']),
@@ -256,20 +255,20 @@ function lbbhc_hit_url_callback($url,$bodies,$headers) {
 	$message[1] = $returnBody;
 	
 	echo implode("||||",$message);
-	do_action ( "lbbhc_hit_url_callbacksas" );
+	do_action ( "wp_webhooks_hit_url_callbacksas" );
 	die();
 }
 
 
 //Hook function for post/page call
-function lbbhc_get_post_page() {
+function wp_webhooks_get_post_page() {
   global $wpdb; // this is how you get access to the database
 	//$form = json_decode($_REQUEST["form"]);
 	$request = $_REQUEST;
-	$resultdata    = $wpdb->get_results("SELECT * FROM ".$wpdb->prefix."web_hooks WHERE hook_for = '".$request["post_type"]."' and status=1 and delete_status=0",ARRAY_A);
+	$resultdata    = $wpdb->get_results("SELECT * FROM ".$wpdb->prefix."webhooks WHERE hook_for = '".$request["post_type"]."' and status=1 and delete_status=0",ARRAY_A);
 	foreach($resultdata as $postdata){
 		$applied = explode(",",$postdata["applied_on"]);
-    if(in_array($request["post_status"],$applied)){
+    if(in_array($request["post_status"],$applied) or empty($postdata["applied_on"])){
 			$data        = json_decode($postdata["data"],true);
 			$method      = strtoupper($postdata["call_type"]);
 			$headerdata  = json_decode($postdata["headers"],true);
@@ -346,7 +345,7 @@ function lbbhc_get_post_page() {
 			$returnBody   = $response[1];
 			
 			//Insert hook data to table
-			$wpdb->insert( $wpdb->prefix."web_logs", 
+			$wpdb->insert( $wpdb->prefix."webhooks_logs", 
 										 array(
 													 'hook_id'        => stripslashes($postdata['id']),
 													 'post_id'        => stripslashes($request["post_ID"]),
@@ -356,7 +355,6 @@ function lbbhc_get_post_page() {
 													 'response'       => $output,
 													) 
 										);
-			//do_action ( "lbbhc_hit_url_callbacksas" );
 		}
 	}
 	return true;
@@ -380,7 +378,7 @@ function get_headers_from_curl_response($response)
     return $headers;
 }
 //Custom hooh when performing action with post/page
-add_action( 'transition_post_status', 'lbbhc_get_post_page', 10,3 );
+add_action( 'transition_post_status', 'wp_webhooks_get_post_page', 10,3 );
 
 function response_codes($code)
 {
@@ -444,13 +442,14 @@ function response_codes($code)
 	return $http_codes[$code];
 }
 //Activate plugin
-function lbbch_wp_activate() {
+function wp_webhooks_activate() {
 	global $wpdb;
 	//Create hook table
-	$wpdb->query("CREATE TABLE IF NOT EXISTS ".$wpdb->prefix."web_hooks (
+	$wpdb->query("CREATE TABLE IF NOT EXISTS ".$wpdb->prefix."webhooks (
 			`id` int(11) NOT NULL,
 			`hook_for` varchar(50) NOT NULL,
 			`call_type` varchar(10) NOT NULL,
+			`applied_on` varchar(100) DEFAULT NULL,
 			`url` text NOT NULL,
 			`data` text NOT NULL,
 			`headers` text,
@@ -464,7 +463,7 @@ function lbbch_wp_activate() {
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;");
 	
 	//Create logs table
-	$wpdb->query("CREATE TABLE ".$wpdb->prefix."web_logs (
+	$wpdb->query("CREATE TABLE ".$wpdb->prefix."webhooks_logs (
 		`id` int(11) NOT NULL,
 		`hook_id` int(11) NOT NULL,
 		`post_id` int(11) NOT NULL,
@@ -473,20 +472,20 @@ function lbbch_wp_activate() {
 		`date_added` datetime DEFAULT NULL,
 		`response` text
 	) ENGINE=InnoDB DEFAULT CHARSET=latin1;");
-	$wpdb->query("ALTER TABLE ".$wpdb->prefix."web_logs
+	$wpdb->query("ALTER TABLE ".$wpdb->prefix."webhooks_logs
     ADD PRIMARY KEY (`id`);");
-	$wpdb->query("ALTER TABLE ".$wpdb->prefix."web_logs
+	$wpdb->query("ALTER TABLE ".$wpdb->prefix."webhooks_logs
     MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;");
 }
-register_activation_hook( __FILE__, 'lbbch_wp_activate' );
+register_activation_hook( __FILE__, 'wp_webhooks_activate' );
 
 //Deactivate plugin
-function lbbch_wp_deactivate() {
+function wp_webhooks_deactivate() {
 	global $wpdb;
-	$wpdb->query( "DROP TABLE IF EXISTS ".$wpdb->prefix."web_hooks" );
-	$wpdb->query( "DROP TABLE IF EXISTS ".$wpdb->prefix."web_logs" );
+	$wpdb->query( "DROP TABLE IF EXISTS ".$wpdb->prefix."webhooks" );
+	$wpdb->query( "DROP TABLE IF EXISTS ".$wpdb->prefix."webhooks_logs" );
 }
 
-register_deactivation_hook( __FILE__, 'lbbch_wp_deactivate' );
+register_uninstall_hook( __FILE__, 'wp_webhooks_deactivate' );
 
 ?>

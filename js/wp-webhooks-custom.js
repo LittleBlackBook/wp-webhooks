@@ -97,3 +97,17 @@ jQuery(document).on("click",".validateJson",function(){
 		}
 	});
 })
+
+jQuery(document).on("click",".applied_on",function(){
+	var total = jQuery(".applied_on").length;
+	var count = jQuery(".applied_on:checked").length;
+	if(jQuery(this).is(":checked")){
+		if(jQuery(this).val() == "all"){
+			jQuery(".applied_on").prop('checked', true);
+		}
+	}else{
+		if(jQuery(this).val() == "all"){
+			jQuery(".applied_on").prop('checked', false);
+		}
+	}
+})

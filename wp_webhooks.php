@@ -222,10 +222,10 @@ function wp_webhooks_hit_url_callback($url,$bodies,$headers) {
 	$returnHeader = json_encode(get_headers_from_curl_response($response[0]));
 	$returnBody   = $response[1];
 	
-	if($getinfo["http_code"] == 200){
+	//if($getinfo["http_code"] == 200){
 		$responseArray = array("header" => $returnHeader,"body" => $returnBody);
 		if(!empty($id)){
-			$wpdb->update($wpdb->prefix."webhooks",
+			if($wpdb->update($wpdb->prefix."webhooks",
 			              array('hook_for'  => stripslashes($_POST['hook_for']), 
 												 'call_type'  => stripslashes($_POST['method']),
 												 'url'        => stripslashes($_POST['url']),
@@ -235,10 +235,14 @@ function wp_webhooks_hit_url_callback($url,$bodies,$headers) {
 												 'applied_on' => implode(",",$request["applied_on"]),
 												),
 										array( 'id' => $id ) 
-										);
+										)){
+											echo "success";
+										}else{
+											echo "error";
+										}
 		}else{
 		//Insert hook data to table
-		$wpdb->insert( $wpdb->prefix."webhooks", 
+		if($wpdb->insert( $wpdb->prefix."webhooks", 
 		               array('hook_for'   => stripslashes($_POST['hook_for']), 
 												 'call_type'  => stripslashes($_POST['method']),
 												 'url'        => stripslashes($_POST['url']),
@@ -247,14 +251,18 @@ function wp_webhooks_hit_url_callback($url,$bodies,$headers) {
 												 'response'   => json_encode($responseArray),
 												 'applied_on' => implode(",",$request["applied_on"]),
 												) 
-								 );
+								 )){
+									 echo "success";
+								 }else{
+									 echo "error";
+								 }
 		}
-	}
-  $message           = "";
+	//}
+  /*$message    = "";
 	$message[0] = $returnHeader;
 	$message[1] = $returnBody;
 	
-	echo implode("||||",$message);
+	echo implode("||||",$message);*/
 	do_action ( "wp_webhooks_hit_url_callbacksas" );
 	die();
 }

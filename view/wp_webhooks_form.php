@@ -4,8 +4,9 @@
 		<a href="?page=wp-webhooks-options&amp;tab=hook-logs" class="hookClick tabs <?php if($tab == 'hook-logs'){echo 'active';}?>">Logs</a>
 	</div>
 	<div class="hookForm">
+	  <div class="hook-form-message"></div>
 		<form class="hook-form">
-			<input type="hidden" name="action" value="wp-webhooks_hit_url">
+			<input type="hidden" name="action" value="wp_webhooks_hit_url">
 			<div class="applied_div">
 			  <label>Applied On: </label>
 				<input type="checkbox" value="all" class="applied_on"><span>all</span>
@@ -18,7 +19,6 @@
 				<input type="checkbox" name="applied_on[]" class="applied_on" value="trash"><span>Trash</span>
 			</div>
 			<select name="hook_for" class="form-control">
-				<option value="""">Hook For</option>
 				<option value="post">Post</option>
 				<option value="page">Page</option>
 			</select>
@@ -29,7 +29,6 @@
 				<option value="PUT">PUT</option>
 			</select>
 			<input type="text" name="url" placeholder="URL" style="width:600px;">
-			<button type="button" class="sendHooksRequest">Send</button>
 			<br />
 			<div class="tab-container"><a style="cursor:pointer" class="tabs headerTab">Get</a></div>
 			<div class="urlParams">
@@ -80,8 +79,15 @@
 					</tr>
 				</table>
 			</div>
+			<button type="button" class="addNewButton sendHooksRequest">Save
+			  <span class="loader-image">
+			    <img class="ajax-loading" src="<?php echo plugins_url( '../images/ajax-loading.gif', __FILE__ ) ?>">
+				</span>
+			</button>
 		</form>
+		<div class="hook-form-message"></div>
 	</div>
+	<?php /*
 	<div class="" style="">
 		<table class="appendHeaderResponse">
 			<tr>
@@ -90,4 +96,5 @@
 			</tr>
 		</table>
 	</div>
+	*/ ?>
 </div>

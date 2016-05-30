@@ -21,6 +21,13 @@
 	background: #0073aa;
   color: #fff;
   padding: 7px 22px;
+	border:0;
+	outline:0;
+	cursor:pointer;
+}
+.addNewButton.disabled{
+	background:grey;
+	cursor:none;
 }
 .addNew{
 	margin-bottom:15px;
@@ -70,4 +77,31 @@
 }
 .applied_div  span{
 	margin-right:12px;
+}
+.sendHooksRequest{
+	margin:20px 0 5px 0;
+}
+.headerParams,.bodyParams{
+	margin-top:20px;
+}
+.hook-form .ajax-loading{
+	vertical-align: middle;
+}
+.hook-form-message{
+	margin: 30px 0;
+	color: #f8f8f8;
+}
+.hook-form-message span.success{
+  padding: 10px;
+	background: green;
+	border: 1px solid #e3e3e3;
+}
+.hook-form-message span.error{
+  padding: 10px;
+	background: red;
+	border: 1px solid #e3e3e3;
+  
+}
+.loader-image{
+	display:none;
 }

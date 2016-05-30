@@ -6,16 +6,23 @@ jQuery(document).on("click",".sendHooksRequest",function(evt){
 	evt.preventDefault();
 	var formdata = jQuery(this).closest("form");
 	var serialized = formdata.serialize();
+	var $this = jQuery(this);
+	jQuery(this).attr("disabled", true);
+	jQuery(this).addClass("disabled");
+	jQuery(".loader-image").show();
 	jQuery.ajax({
     url: ajaxurl,
     method: 'POST',
     data: serialized,
     success: function(data){
-			//var response = jQuery.parseJSON(data);
-		  var response = data.split("||||");
-      //console.log(response.header);
-			jQuery(".headerResponse").val(response[0]);
-			jQuery(".bodyResponse").val(response[1]);
+			$this.removeAttr("disabled");
+			$this.removeClass("disabled");
+	    jQuery(".loader-image").hide();
+			if(data == "success"){
+				jQuery(".hook-form-message").html("<span class='success'>Success! Hook Saved Successfully.");
+			}else{
+				jQuery(".hook-form-message").html("<span class='error'>Error! Failed to save Hook.");
+			}
     }
   });
 	

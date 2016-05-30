@@ -4,6 +4,7 @@
 		<a href="?page=wp-webhooks-options&amp;tab=hook-logs" class="hookClick tabs <?php if($tab == 'hook-logs'){echo 'active';}?>">Logs</a>
 	</div>
 	<div class="hookForm">
+	  <div class="hook-form-message"></div>
 		<form class="hook-form">
 			<input type="hidden" name="action" value="wp_webhooks_hit_url">
 			<input type="hidden" name="id" value="<?php echo $result['id'] ?>">
@@ -20,7 +21,6 @@
 				<input <?php if(in_array("trash",$applied)){echo "checked";}?> type="checkbox" class="applied_on" name="applied_on[]" value="trash"><span>Trash</span>
 			</div>
 			<select name="hook_for" class="form-control">
-				<option value="">Hook For</option>
 				<option <?php if($result["hook_for"] == "post"){echo "selected";} ?> value="post">Post</option>
 				<option <?php if($result["hook_for"] == "page"){echo "selected";} ?> value="page">Page</option>
 			</select>
@@ -31,7 +31,6 @@
 				<option <?php if($result["call_type"] == "PUT"){echo "selected";} ?> value="PUT">PUT</option>
 			</select>
 			<input type="text" value="<?php echo $result["url"]; ?>" name="url" style="width:600px;">
-			<button type="button" class="sendHooksRequest">Send</button>
 			<br />
 			<?php
 			$data     = json_decode(stripcslashes($result["data"]),true);
@@ -135,8 +134,15 @@
 					</tr>
 				</table>
 			</div>
+			<button type="button" class="addNewButton sendHooksRequest">Save
+			  <span class="loader-image">
+			    <img class="" src="<?php echo plugins_url( '../images/ajax-loading.gif', __FILE__ ) ?>">
+				</span>
+			</button>
 		</form>
+		<div class="hook-form-message"></div>
 	</div>
+	<?php /*
 	<div class="" style="">
 		<table class="appendHeaderResponse">
 			<tr>
@@ -145,4 +151,5 @@
 			</tr>
 		</table>
 	</div>
+	*/ ?>
 </div>

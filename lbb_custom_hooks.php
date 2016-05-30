@@ -233,6 +233,7 @@ function lbbhc_hit_url_callback($url,$bodies,$headers) {
 												 'data'       => stripslashes($bodyarray),
 												 'headers'    => stripslashes(json_encode($headers)),
 												 'response'   => json_encode($responseArray),
+												 'applied_on' => implode(",",$request["applied_on"]),
 												),
 										array( 'id' => $id ) 
 										);
@@ -245,6 +246,7 @@ function lbbhc_hit_url_callback($url,$bodies,$headers) {
 												 'data'       => stripslashes($bodyarray),
 												 'headers'    => stripslashes(json_encode($headers)),
 												 'response'   => json_encode($responseArray),
+												 'applied_on' => implode(",",$request["applied_on"]),
 												) 
 								 );
 		}
@@ -264,96 +266,98 @@ function lbbhc_get_post_page() {
   global $wpdb; // this is how you get access to the database
 	//$form = json_decode($_REQUEST["form"]);
 	$request = $_REQUEST;
-	
 	$resultdata    = $wpdb->get_results("SELECT * FROM ".$wpdb->prefix."web_hooks WHERE hook_for = '".$request["post_type"]."' and status=1 and delete_status=0",ARRAY_A);
 	foreach($resultdata as $postdata){
-		$data        = json_decode($postdata["data"],true);
-		$method      = strtoupper($postdata["call_type"]);
-		$headerdata  = json_decode($postdata["headers"],true);
-		
-		$bodyGetData  = $data["get"];
-		$bodyPostData = $data["post"];
-		//Parse the url params
-		$urlparams  = "";
-		
-		if(!empty($bodyGetData)){
-			foreach($bodyGetData as $bodygetkey => $bodygetvalue){
-				if (strpos($bodygetvalue, '%%') !== false) {
-					$val   = trim(str_replace("%%","",$bodygetvalue));
-					$value = $_REQUEST[$val];
-					$data["data"]["get"][$bodygetkey] = $value;
-				}else{
-					$data["data"]["get"][$bodygetkey] = $bodygetvalue;
+		$applied = explode(",",$postdata["applied_on"]);
+    if(in_array($request["post_status"],$applied)){
+			$data        = json_decode($postdata["data"],true);
+			$method      = strtoupper($postdata["call_type"]);
+			$headerdata  = json_decode($postdata["headers"],true);
+			
+			$bodyGetData  = $data["get"];
+			$bodyPostData = $data["post"];
+			//Parse the url params
+			$urlparams  = "";
+			
+			if(!empty($bodyGetData)){
+				foreach($bodyGetData as $bodygetkey => $bodygetvalue){
+					if (strpos($bodygetvalue, '%%') !== false) {
+						$val   = trim(str_replace("%%","",$bodygetvalue));
+						$value = $_REQUEST[$val];
+						$data["data"]["get"][$bodygetkey] = $value;
+					}else{
+						$data["data"]["get"][$bodygetkey] = $bodygetvalue;
+					}
+				}
+				$urlparams = $data["data"]["get"];
+			}
+			
+			$bodyparams  = "";
+			
+			if(!empty($bodyPostData)){
+				foreach($bodyPostData as $bodypostkey => $bodypostvalue){
+					if (strpos($bodypostvalue, '%%') !== false) {
+						$val   = trim(str_replace("%%","",$bodypostvalue));
+						$value = $_REQUEST[$val];
+						$data["data"]["post"][$bodypostkey] = $value;
+					}else{
+						$data["data"]["post"][$bodypostkey] = $bodypostvalue;
+					}
+					$bodyparams = $data["data"]["post"];
+					if($method == "POST"){
+						$bodyparams = json_encode($bodyparams);
+					}
 				}
 			}
-			$urlparams = $data["data"]["get"];
-		}
-		
-		$bodyparams  = "";
-		
-		if(!empty($bodyPostData)){
-			foreach($bodyPostData as $bodypostkey => $bodypostvalue){
-				if (strpos($bodypostvalue, '%%') !== false) {
-					$val   = trim(str_replace("%%","",$bodypostvalue));
-					$value = $_REQUEST[$val];
-					$data["data"]["post"][$bodypostkey] = $value;
-				}else{
-					$data["data"]["post"][$bodypostkey] = $bodypostvalue;
-				}
-				$bodyparams = $data["data"]["post"];
-				if($method == "POST"){
-					$bodyparams = json_encode($bodyparams);
+			
+			//Parse the header params
+			$headers = "";
+			if(!empty($headerdata)){
+				foreach($headerdata as $headerkey => $headdervalue){
+					$headers[] = $headerkey.':'.$headdervalue;
 				}
 			}
-		}
-		
-		//Parse the header params
-		$headers = "";
-		if(!empty($headerdata)){
-			foreach($headerdata as $headerkey => $headdervalue){
-				$headers[] = $headerkey.':'.$headdervalue;
-			}
-		}
 
-		$querystring = !empty($urlparams) ? "?".http_build_query($urlparams) : "";
-		$url         = $postdata["url"].$querystring;
-		$ch          = curl_init();
-		// set url
-		curl_setopt($ch, CURLOPT_URL, $url);
-		//return the transfer as a string
-		curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-		curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
-		//$headers[] = 'client_id: wpweb';
-		//$headers[] = 'client_secret: 5dfe726a08c37e7dab97f6d02041766ca6008a24231c3797bf94761a90a19d7b';
-		curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
-		curl_setopt($ch, CURLOPT_HEADER, true);
-		curl_setopt($ch, CURLOPT_CUSTOMREQUEST, $method);
-		
-		//print_r($bodies);exit;
-		if(isset($bodies) && $bodies != ''){
-			curl_setopt($ch, CURLOPT_POSTFIELDS, $bodyparams);
+			$querystring = !empty($urlparams) ? "?".http_build_query($urlparams) : "";
+			$url         = $postdata["url"].$querystring;
+			$ch          = curl_init();
+			// set url
+			curl_setopt($ch, CURLOPT_URL, $url);
+			//return the transfer as a string
+			curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+			curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+			//$headers[] = 'client_id: wpweb';
+			//$headers[] = 'client_secret: 5dfe726a08c37e7dab97f6d02041766ca6008a24231c3797bf94761a90a19d7b';
+			curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+			curl_setopt($ch, CURLOPT_HEADER, true);
+			curl_setopt($ch, CURLOPT_CUSTOMREQUEST, $method);
+			
+			//print_r($bodies);exit;
+			if(isset($bodies) && $bodies != ''){
+				curl_setopt($ch, CURLOPT_POSTFIELDS, $bodyparams);
+			}
+			
+			// $output contains the output string
+			$output  = curl_exec($ch);
+			$getinfo = curl_getinfo($ch);
+			curl_close($ch);
+			$response     = explode("\r\n\r\n", $output, 2);
+			$returnHeader = json_encode(get_headers_from_curl_response($response[0]));
+			$returnBody   = $response[1];
+			
+			//Insert hook data to table
+			$wpdb->insert( $wpdb->prefix."web_logs", 
+										 array(
+													 'hook_id'        => stripslashes($postdata['id']),
+													 'post_id'        => stripslashes($request["post_ID"]),
+													 'post_type'      => stripslashes($request["post_type"]),
+													 'response_code'  => stripslashes($getinfo["http_code"]),
+													 'date_added'     => date("Y-m-d H:i:s"),
+													 'response'       => $output,
+													) 
+										);
+			//do_action ( "lbbhc_hit_url_callbacksas" );
 		}
-		
-		// $output contains the output string
-		$output  = curl_exec($ch);
-		$getinfo = curl_getinfo($ch);
-		curl_close($ch);
-		$response     = explode("\r\n\r\n", $output, 2);
-		$returnHeader = json_encode(get_headers_from_curl_response($response[0]));
-		$returnBody   = $response[1];
-		
-		//Insert hook data to table
-		$wpdb->insert( $wpdb->prefix."web_logs", 
-									 array(
-												 'hook_id'        => stripslashes($postdata['id']),
-												 'post_id'        => stripslashes($request["post_ID"]),
-												 'post_type'      => stripslashes($request["post_type"]),
-												 'response_code'  => stripslashes($getinfo["http_code"]),
-												 'date_added'     => date("Y-m-d H:i:s"),
-												 'response'       => $output,
-												) 
-									);
-		//do_action ( "lbbhc_hit_url_callbacksas" );
 	}
 	return true;
 	//die();

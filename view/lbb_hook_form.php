@@ -6,6 +6,16 @@
 	<div class="hookForm">
 		<form class="hook-form">
 			<input type="hidden" name="action" value="lbbhc_hit_url">
+			<div>
+			  <label>Applied On</label>
+				<input type="checkbox" name="applied_on[]" value="Publish">Publish
+				<input type="checkbox" name="applied_on[]" value="inherit ">Inherit  
+				<input type="checkbox" name="applied_on[]" value="pending">Pending 
+				<input type="checkbox" name="applied_on[]" value="private">Private 
+				<input type="checkbox" name="applied_on[]" value="future">Future 
+				<input type="checkbox" name="applied_on[]" value="draft">Draft 
+				<input type="checkbox" name="applied_on[]" value="trash">Trash 
+			</div>
 			<select name="hook_for" class="form-control">
 				<option value="""">Hook For</option>
 				<option value="post">Post</option>

@@ -4,10 +4,21 @@
 		<a href="?page=lbbch-options&amp;tab=hook-logs" class="hookClick tabs <?php if($tab == 'hook-logs'){echo 'active';}?>">Logs</a>
 	</div>
 	<div class="hookForm">
-
 		<form class="hook-form">
 			<input type="hidden" name="action" value="lbbhc_hit_url">
 			<input type="hidden" name="id" value="<?php echo $result['id'] ?>">
+			<div class="applied-on">
+			  <?php $applied = explode(",",trim($result["applied_on"]));?>
+				<br>
+			  <label>Applied On</label>
+				<input <?php if(in_array("publish",$applied)){echo "checked";}?> type="checkbox" name="applied_on[]" value="publish">Publish
+				<input <?php if(in_array("inherit",$applied)){echo "checked";}?> type="checkbox" name="applied_on[]" value="inherit">Inherit  
+				<input <?php if(in_array("pending",$applied)){echo "checked";}?> type="checkbox" name="applied_on[]" value="pending">Pending 
+				<input <?php if(in_array("private",$applied)){echo "checked";}?> type="checkbox" name="applied_on[]" value="private">Private 
+				<input <?php if(in_array("future",$applied)){echo "checked";}?> type="checkbox" name="applied_on[]" value="future">Future 
+				<input <?php if(in_array("draft",$applied)){echo "checked";}?> type="checkbox" name="applied_on[]" value="draft">Draft 
+				<input <?php if(in_array("trash",$applied)){echo "checked";}?> type="checkbox" name="applied_on[]" value="trash">Trash 
+			</div>
 			<select name="hook_for" class="form-control">
 				<option value="">Hook For</option>
 				<option <?php if($result["hook_for"] == "post"){echo "selected";} ?> value="post">Post</option>

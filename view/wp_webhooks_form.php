@@ -10,8 +10,8 @@
 			<div class="applied_div">
 			  <label>Applied On: </label>
 				<input type="checkbox" value="all" class="applied_on"><span>all</span>
-				<input type="checkbox" name="applied_on[]" class="applied_on" value="Publish"><span>Publish</span>
-				<input type="checkbox" name="applied_on[]" class="applied_on" value="inherit "><span>Inherit</span>
+				<input type="checkbox" name="applied_on[]" class="applied_on" value="publish"><span>Publish</span>
+				<input type="checkbox" name="applied_on[]" class="applied_on" value="inherit"><span>Inherit</span>
 				<input type="checkbox" name="applied_on[]" class="applied_on" value="pending"><span>Pending</span>
 				<input type="checkbox" name="applied_on[]" class="applied_on" value="private"><span>Private</span>
 				<input type="checkbox" name="applied_on[]" class="applied_on" value="future"><span>Future</span>

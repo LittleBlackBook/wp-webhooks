@@ -465,9 +465,9 @@ function wp_webhooks_activate() {
 			`status` int(11) NOT NULL DEFAULT '1',
 			`delete_status` int(11) NOT NULL DEFAULT '0'
 		) ENGINE=InnoDB DEFAULT CHARSET=latin1;");
-	$wpdb->query("ALTER TABLE `wp_hooks`
+	$wpdb->query("ALTER TABLE ".$wpdb->prefix."webhooks
 		ADD PRIMARY KEY (`id`);");
-	$wpdb->query("ALTER TABLE `wp_hooks`
+	$wpdb->query("ALTER TABLE ".$wpdb->prefix."webhooks
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;");
 	
 	//Create logs table

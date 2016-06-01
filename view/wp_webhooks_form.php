@@ -98,7 +98,4 @@
 	</div>
 	*/ ?>
 </div>
-<div>
-Notes:<br>
-Use dynamic variables in value as %%test%%. Suppose if you want to replace the post id then keep value as %%post_ID%% so it will automatically replace the post id in that hook.
-</div>
+<?php include("wp_webhooks_notes.php"); ?>

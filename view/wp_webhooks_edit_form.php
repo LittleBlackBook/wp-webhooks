@@ -153,3 +153,4 @@
 	</div>
 	*/ ?>
 </div>
+<?php include("wp_webhooks_notes.php"); ?>

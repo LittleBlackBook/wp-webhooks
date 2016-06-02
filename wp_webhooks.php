@@ -184,16 +184,17 @@ function wp_webhooks_hit_url_callback($url,$bodies,$headers) {
 				}
 			}
 		}
-		$bodypost = $bodies;
+		
 		if($request["method"] == "DELETE"){
 		  $bodies = json_encode($bodies);
 	  }
-	}else{
-		$bodies = stripslashes($request["body-raw-value"]);
+	}else{ 
+		$bodies = json_decode(stripslashes(trim(preg_replace('/\s+/', ' ',$request["body-raw-value"]))),true);
 	}
-	$bodyarray = json_encode(array("form-data" => $request["formdata_type"],"get" => $urlparams,"post" => $bodypost));
 	
-	$querystring = !empty($urlparams) ? "?".http_build_query($urlparams) : "";
+	$bodyarray = json_encode(array("form-data" => $request["formdata_type"],"get" => $urlparams,"post" => $bodies));
+	
+	/*$querystring = !empty($urlparams) ? "?".http_build_query($urlparams) : "";
 	$url        = $_REQUEST["url"].$querystring;
 	$ch         = curl_init();
 	
@@ -221,9 +222,9 @@ function wp_webhooks_hit_url_callback($url,$bodies,$headers) {
 	$response = explode("\r\n\r\n", $output, 2);
 	$returnHeader = json_encode(get_headers_from_curl_response($response[0]));
 	$returnBody   = $response[1];
-	
+	*/
 	//if($getinfo["http_code"] == 200){
-		$responseArray = array("header" => $returnHeader,"body" => $returnBody);
+		//$responseArray = array("header" => $returnHeader,"body" => $returnBody);
 		if(!empty($id)){
 			if($wpdb->update($wpdb->prefix."webhooks",
 			              array('hook_for'  => stripslashes($_POST['hook_for']), 
@@ -231,7 +232,7 @@ function wp_webhooks_hit_url_callback($url,$bodies,$headers) {
 												 'url'        => stripslashes($_POST['url']),
 												 'data'       => stripslashes($bodyarray),
 												 'headers'    => stripslashes(json_encode($headers)),
-												 'response'   => json_encode($responseArray),
+												 //'response'   => json_encode($responseArray),
 												 'applied_on' => implode(",",$request["applied_on"]),
 												),
 										array( 'id' => $id ) 
@@ -248,7 +249,7 @@ function wp_webhooks_hit_url_callback($url,$bodies,$headers) {
 												 'url'        => stripslashes($_POST['url']),
 												 'data'       => stripslashes($bodyarray),
 												 'headers'    => stripslashes(json_encode($headers)),
-												 'response'   => json_encode($responseArray),
+												 //'response'   => json_encode($responseArray),
 												 'applied_on' => implode(",",$request["applied_on"]),
 												) 
 								 )){
@@ -303,25 +304,42 @@ function wp_webhooks_get_post_page() {
 			
 			if(!empty($bodyPostData)){
 				foreach($bodyPostData as $bodypostkey => $bodypostvalue){
-					if (strpos($bodypostvalue, '%%') !== false) {
-						$val   = trim(str_replace("%%","",$bodypostvalue));
-						$value = $_REQUEST[$val];
-						$data["data"]["post"][$bodypostkey] = $value;
+					if(is_array($bodypostvalue)){
+						foreach($bodypostvalue as $pkey => $pval)
+						if (strpos($$pval, '%%') !== false) {
+							$val   = trim(str_replace("%%","",$$pval));
+							$value = $_REQUEST[$val];
+							$data["data"]["post"][$bodypostkey][$pkey] = $value;
+						}else{
+							$data["data"]["post"][$bodypostkey][$pkey] = $pval;
+						}
+						$bodyparams = $data["data"]["post"];
+						if($method == "POST"){
+							$bodyparams = $bodyparams;
+						}
 					}else{
-						$data["data"]["post"][$bodypostkey] = $bodypostvalue;
-					}
-					$bodyparams = $data["data"]["post"];
-					if($method == "POST"){
-						$bodyparams = json_encode($bodyparams);
+						if (strpos($bodypostvalue, '%%') !== false) {
+							$val   = trim(str_replace("%%","",$bodypostvalue));
+							$value = $_REQUEST[$val];
+							$data["data"]["post"][$bodypostkey] = $value;
+						}else{
+							$data["data"]["post"][$bodypostkey] = $bodypostvalue;
+						}
+						$bodyparams = $data["data"]["post"];
+						if($method == "POST"){
+							$bodyparams = $bodyparams;
+						}
 					}
 				}
 			}
-			
+			if(isMultiArray($bodyparams)){
+				$bodyparams = http_build_query($bodyparams);
+			}
 			//Parse the header params
 			$headers = "";
 			if(!empty($headerdata)){
 				foreach($headerdata as $headerkey => $headdervalue){
-					$headers[] = $headerkey.':'.$headdervalue;
+					$headers[$headerkey] = $headdervalue;
 				}
 			}
 
@@ -338,11 +356,7 @@ function wp_webhooks_get_post_page() {
 			curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
 			curl_setopt($ch, CURLOPT_HEADER, true);
 			curl_setopt($ch, CURLOPT_CUSTOMREQUEST, $method);
-			
-			//print_r($bodies);exit;
-			if(isset($bodies) && $bodies != ''){
-				curl_setopt($ch, CURLOPT_POSTFIELDS, $bodyparams);
-			}
+			curl_setopt($ch, CURLOPT_POSTFIELDS, $bodyparams);
 			
 			// $output contains the output string
 			$output  = curl_exec($ch);
@@ -367,6 +381,12 @@ function wp_webhooks_get_post_page() {
 	}
 	return true;
 	//die();
+}
+
+//Check for multidimensional array
+function isMultiArray($a){
+    foreach($a as $v) if(is_array($v)) return TRUE;
+    return FALSE;
 }
 
 //Convert headers data to array

@@ -127,7 +127,7 @@
 				<table class="appendBodyDiv raw-data" <?php if($data["form-data"] == "row-data"){}else{echo "style='display:none'";} ?>>
 					<tr>
 						<td>
-						  <td><textarea class="raw-form-data-area" name="body-raw-value" rows="10" cols="70"><?php echo $result["data"]; ?></textarea>
+						  <td><textarea class="raw-form-data-area" name="body-raw-value" rows="10" cols="70"><?php echo json_encode($data["post"]); ?></textarea>
 						<button type="button" class="validateJson">Validate</button>
 						<span class="Validateresult"></span>
 						</td>

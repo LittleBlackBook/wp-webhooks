@@ -473,7 +473,7 @@ function response_codes($code)
 function wp_webhooks_activate() {
 	global $wpdb;
 	//Create hook table
-	$wpdb->query("CREATE TABLE IF NOT EXISTS ".$wpdb->prefix."webhooks (
+	$query = "CREATE TABLE IF NOT EXISTS ".$wpdb->prefix."webhooks (
 			`id` int(11) NOT NULL,
 			`hook_for` varchar(50) NOT NULL,
 			`call_type` varchar(10) NOT NULL,
@@ -484,14 +484,16 @@ function wp_webhooks_activate() {
 			`response` text NOT NULL,
 			`status` int(11) NOT NULL DEFAULT '1',
 			`delete_status` int(11) NOT NULL DEFAULT '0'
-		) ENGINE=InnoDB DEFAULT CHARSET=latin1;");
+		) ENGINE=InnoDB DEFAULT CHARSET=latin1;";
+	require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
+  dbDelta($query);
 	$wpdb->query("ALTER TABLE ".$wpdb->prefix."webhooks
 		ADD PRIMARY KEY (`id`);");
 	$wpdb->query("ALTER TABLE ".$wpdb->prefix."webhooks
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;");
 	
 	//Create logs table
-	$wpdb->query("CREATE TABLE ".$wpdb->prefix."webhooks_logs (
+	$query = "CREATE TABLE ".$wpdb->prefix."webhooks_logs (
 		`id` int(11) NOT NULL,
 		`hook_id` int(11) NOT NULL,
 		`post_id` int(11) NOT NULL,
@@ -499,7 +501,9 @@ function wp_webhooks_activate() {
 		`response_code` int(11) NOT NULL,
 		`date_added` datetime DEFAULT NULL,
 		`response` text
-	) ENGINE=InnoDB DEFAULT CHARSET=latin1;");
+	) ENGINE=InnoDB DEFAULT CHARSET=latin1;";
+	require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
+  dbDelta($query);
 	$wpdb->query("ALTER TABLE ".$wpdb->prefix."webhooks_logs
     ADD PRIMARY KEY (`id`);");
 	$wpdb->query("ALTER TABLE ".$wpdb->prefix."webhooks_logs

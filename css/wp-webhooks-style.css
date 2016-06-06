@@ -1,0 +1,114 @@
+.hook-form{
+}
+.wp_hook_container{
+	margin:20px;
+	font-size:14px;
+}
+.tabs{
+	background: #e3e3e3;
+  padding: 8px 30px;
+	color: #656464;
+}
+.tabs.active{
+  background: #A5A0A0;
+  color: #fff;
+}
+.tab-container{
+	margin-bottom:10px;
+	margin-top:20px;
+}
+.addNewButton{
+	background: #0073aa;
+  color: #fff;
+  padding: 7px 22px;
+	border:0;
+	outline:0;
+	cursor:pointer;
+}
+.addNewButton.disabled{
+	background:grey;
+	cursor:none;
+}
+.addNew{
+	margin-bottom:15px;
+	margin-top:25px;
+}
+.wp_hooks_table{
+	width:90%;
+	margin:20px;
+	border:1px solid #f8f8f8;
+}
+.wp_hooks_table th{
+  text-align:left;
+	border-bottom:2px solid #e3e3e3;
+	padding:10px;
+	background:#e8e8e8;
+}
+.wp_hooks_table td{
+  text-align:left;
+	border-right:1px solid #e3e3e3;
+	border-bottom:1px solid #e3e3e3;
+	padding:5px;
+}
+.wp_hooks_table tr:last-child td{
+	border-bottom:0px;
+}
+.hook-form input[type="text"],select{
+	height:34px !important;
+	padding:6px;
+}
+.hook-form select{
+	
+}
+.hook-heading{
+	font-size:18px;
+	margin:6px 0 10px 0;
+	text-decoration:underline;
+	font-weight:700;
+}
+.applied_div{
+	margin:12px 0;
+	margin-top: 25px;
+}
+.applied_div label{
+	font-size:16px;
+	font-weight:700;
+	margin:8px 15px 8px 0;
+}
+.applied_div  span{
+	margin-right:12px;
+}
+.sendHooksRequest{
+	margin:20px 0 5px 0;
+}
+.headerParams,.bodyParams{
+	margin-top:20px;
+}
+.hook-form .ajax-loading{
+	vertical-align: middle;
+}
+.hook-form-message{
+	margin: 30px 0;
+	color: #f8f8f8;
+}
+.hook-form-message span.success{
+  padding: 10px;
+	background: green;
+	border: 1px solid #e3e3e3;
+}
+.hook-form-message span.error{
+  padding: 10px;
+	background: red;
+	border: 1px solid #e3e3e3;
+  
+}
+.loader-image{
+	display:none;
+}
+.hhok-heading{
+	font-size:18px;
+	font-weight:700;
+}
+.hook-notes{
+	font-size:15px;
+}

@@ -178,7 +178,7 @@ function wp_webhooks_hit_url_callback($url,$bodies,$headers) {
 		for($i=0;$i<$bodiescount;$i++){
 			if($bodieskey[$i] != ""){
 				if($bodiesis_array[$i] == 1){
-					$bodies[$bodieskey[$i]][] = $bodiesvalue[$i];
+					$bodies[$bodieskey[$i]][] = stripslashes(trim(preg_replace('/\s+/', ' ',$bodiesvalue[$i])));
 				}else{
 					$bodies[$bodieskey[$i]] = $bodiesvalue[$i];
 				}
@@ -186,14 +186,14 @@ function wp_webhooks_hit_url_callback($url,$bodies,$headers) {
 		}
 		
 		if($request["method"] == "DELETE"){
-		  $bodies = json_encode($bodies);
+		  $bodies = $bodies;
 	  }
 	}else{ 
 		$bodies = json_decode(stripslashes(trim(preg_replace('/\s+/', ' ',$request["body-raw-value"]))),true);
 	}
 	
 	$bodyarray = json_encode(array("form-data" => $request["formdata_type"],"get" => $urlparams,"post" => $bodies));
-	
+
 	/*$querystring = !empty($urlparams) ? "?".http_build_query($urlparams) : "";
 	$url        = $_REQUEST["url"].$querystring;
 	$ch         = curl_init();
@@ -313,6 +313,7 @@ function wp_webhooks_get_post_page() {
 						}else{
 							$data["data"]["post"][$bodypostkey][$pkey] = $pval;
 						}
+						//$data["data"]["post"][$bodypostkey] = "[".implode(",",$data["data"]["post"][$bodypostkey])."]	";
 						$bodyparams = $data["data"]["post"];
 						if($method == "POST"){
 							$bodyparams = $bodyparams;
@@ -333,8 +334,11 @@ function wp_webhooks_get_post_page() {
 				}
 			}
 			if(isMultiArray($bodyparams)){
-				$bodyparams = http_build_query($bodyparams);
+				//$bodyparams = http_build_query($bodyparams);
 			}
+			/*echo "<pre>";
+			print_r(json_encode($bodyparams));
+			exit;*/
 			//Parse the header params
 			$headers = "";
 			if(!empty($headerdata)){
@@ -356,7 +360,7 @@ function wp_webhooks_get_post_page() {
 			curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
 			curl_setopt($ch, CURLOPT_HEADER, true);
 			curl_setopt($ch, CURLOPT_CUSTOMREQUEST, $method);
-			curl_setopt($ch, CURLOPT_POSTFIELDS, $bodyparams);
+			curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($bodyparams));
 			
 			// $output contains the output string
 			$output  = curl_exec($ch);

@@ -20,6 +20,9 @@ jQuery(document).on("click",".sendHooksRequest",function(evt){
 	    jQuery(".loader-image").hide();
 			if(data == "success"){
 				jQuery(".hook-form-message").html("<span class='success'>Success! Hook Saved Successfully.");
+				window.setTimeout(function(){
+				  window.location.href = "?page=wp-webhooks-options";
+				}, 1200);
 			}else{
 				jQuery(".hook-form-message").html("<span class='error'>Error! Failed to save Hook.");
 			}

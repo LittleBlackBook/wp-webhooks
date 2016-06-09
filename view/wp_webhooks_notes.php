@@ -176,7 +176,7 @@
 	</tr>
 	<tr>
 	  <td>post_name</td>
-		<td>%%post_name%%</td>
+		<td>%%post_name%% (This is the slug)</td>
 	</tr>
 	<tr>
 	  <td>post_author_override</td>

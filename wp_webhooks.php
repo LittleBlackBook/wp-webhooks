@@ -18,19 +18,23 @@ if ( is_admin() ){
 
 //Hook to add menu in admin panel
 function wp_webhooks_admin_menu() {
-	add_menu_page('Wp Web Hook','Wp Web Hook','manage_options','wp-webhooks-options','wp_webhooks_settings_page' );
+	add_options_page('Wp Web Hook','Wp Web Hook','manage_options','wp-webhooks-options','wp_webhooks_settings_page' );
 }
 
 //Register styles
 function wp_webhooks_admin_style() {
-  wp_register_style( 'wp_webhooks_style', esc_url_raw( plugins_url( 'css/wp-webhooks-style.css', __FILE__ ) ),"", '1.1', "all");
+  wp_register_style( 'wp_webhooks_style', esc_url_raw( plugins_url( 'css/wp-webhooks-style.css', __FILE__ ) ),array(), '1.1', "all");
   wp_enqueue_style( 'wp_webhooks_style' );
+	
+	/*wp_register_script( 'wp-webhooks-custom', esc_url_raw( plugins_url( 'js/wp-webhooks-custom.js', __FILE__ ) ),array(), "1.1", true );
+	wp_enqueue_script( 'wp-webhooks-custom' );
+	
+	wp_register_script( 'jquery.validate-json', esc_url_raw( plugins_url( 'js/jquery.validate-json.js', __FILE__ ) ),array(), '1.1', true );
+  wp_enqueue_script( 'jquery.validate-json' );*/
 }
 add_action( 'admin_enqueue_scripts', 'wp_webhooks_admin_style' );
 
 //Register scripts
-wp_enqueue_script( 'wp-webhooks-custom', esc_url_raw( plugins_url( 'js/wp-webhooks-custom.js', __FILE__ ) ),"", '1.1', true );
-wp_enqueue_script( 'jquery.validate-json', esc_url_raw( plugins_url( 'js/jquery.validate-json.js', __FILE__ ) ),"", '1.1', true );
 //Handle pages request
 function wp_webhooks_settings_page(){
 	global $wpdb; // this is how you get access to the database
@@ -96,7 +100,11 @@ function wp_webhooks_settings_page(){
       break;
     default:
 	}
-		
+	?>
+	<script type='text/javascript' src='http://localhost/lbb_test/wp-content/plugins/wp-webhooks/js/wp-webhooks-custom.js?ver=1.1'></script>
+  <script type='text/javascript' src='http://localhost/lbb_test/wp-content/plugins/wp-webhooks/js/jquery.validate-json.js?ver=1.1'></script>
+
+	<?php	
 	
 }
 
@@ -333,9 +341,9 @@ function wp_webhooks_get_post_page() {
 					}
 				}
 			}
-			if(isMultiArray($bodyparams)){
+			/*if(isMultiArray($bodyparams)){
 				//$bodyparams = http_build_query($bodyparams);
-			}
+			}*/
 			/*echo "<pre>";
 			print_r(json_encode($bodyparams));
 			exit;*/

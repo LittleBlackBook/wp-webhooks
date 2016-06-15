@@ -101,8 +101,8 @@ function wp_webhooks_settings_page(){
     default:
 	}
 	?>
-	<script type='text/javascript' src='http://localhost/lbb_test/wp-content/plugins/wp-webhooks/js/wp-webhooks-custom.js?ver=1.1'></script>
-  <script type='text/javascript' src='http://localhost/lbb_test/wp-content/plugins/wp-webhooks/js/jquery.validate-json.js?ver=1.1'></script>
+	<script type='text/javascript' src='<?php echo esc_url_raw( plugins_url( 'js/wp-webhooks-custom.js', __FILE__ )) ?>'></script>
+  <script type='text/javascript' src='<?php echo esc_url_raw( plugins_url( 'js/jquery.validate-json.js', __FILE__ )) ?>'></script>
 
 	<?php	
 	

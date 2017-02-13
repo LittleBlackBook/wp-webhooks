@@ -25,10 +25,10 @@ function wp_webhooks_admin_menu() {
 function wp_webhooks_admin_style() {
   wp_register_style( 'wp_webhooks_style', esc_url_raw( plugins_url( 'css/wp-webhooks-style.css', __FILE__ ) ),array(), '1.1', "all");
   wp_enqueue_style( 'wp_webhooks_style' );
-	
+
 	/*wp_register_script( 'wp-webhooks-custom', esc_url_raw( plugins_url( 'js/wp-webhooks-custom.js', __FILE__ ) ),array(), "1.1", true );
 	wp_enqueue_script( 'wp-webhooks-custom' );
-	
+
 	wp_register_script( 'jquery.validate-json', esc_url_raw( plugins_url( 'js/jquery.validate-json.js', __FILE__ ) ),array(), '1.1', true );
   wp_enqueue_script( 'jquery.validate-json' );*/
 }
@@ -38,7 +38,7 @@ add_action( 'admin_enqueue_scripts', 'wp_webhooks_admin_style' );
 //Handle pages request
 function wp_webhooks_settings_page(){
 	global $wpdb; // this is how you get access to the database
-	
+
 	$tab = $_GET["tab"];
   switch ($tab) {
     case "":
@@ -84,15 +84,15 @@ function wp_webhooks_settings_page(){
 				$status =  1;
 			}
 			$wpdb->update( $wpdb->prefix."webhooks",
-                     array('status'  => $status), 
-											array( 'id' => $id ) 		
+                     array('status'  => $status),
+											array( 'id' => $id )
 								   );
 			echo "<script>window.location.href='?page=wp-webhooks-options'</script>";
 			exit;
       break;
 		case "delete-hook":
 		  $id = $_GET["id"];
-			$wpdb->delete( $wpdb->prefix."webhooks", 
+			$wpdb->delete( $wpdb->prefix."webhooks",
 		                 array("id" => $id)
 								   );
 			echo "<script>window.location.href='?page=wp-webhooks-options'</script>";
@@ -104,8 +104,8 @@ function wp_webhooks_settings_page(){
 	<script type='text/javascript' src='<?php echo esc_url_raw( plugins_url( 'js/wp-webhooks-custom.js', __FILE__ )) ?>'></script>
   <script type='text/javascript' src='<?php echo esc_url_raw( plugins_url( 'js/jquery.validate-json.js', __FILE__ )) ?>'></script>
 
-	<?php	
-	
+	<?php
+
 }
 
 //Hooks for adding data to database using ajax
@@ -132,14 +132,14 @@ function wp_webhooks_hit_url_callback($url,$bodies,$headers) {
 			}
 		}
 	}
-	
+
 	$urlcount = count($urlskey);
 	for($i=0;$i<$urlcount;$i++){
 		if($urlskey[$i] != ""){
 		  $urlparams[$urlskey[$i]] = $urlsvalue[$i];
 		}
 	}
-	
+
 	//Parse the header params
 	$headers = "";
 	$headerskey     = "";
@@ -154,14 +154,14 @@ function wp_webhooks_hit_url_callback($url,$bodies,$headers) {
 			}
 		}
 	}
-	
+
 	$headercount = count($headerskey);
 	for($i=0;$i<$headercount;$i++){
 		if($headerskey[$i] != ""){
 		  $headers[] = $headerskey[$i].':'.$headersvalue[$i];
 		}
 	}
-	
+
 	if($request["formdata_type"] == "form-data"){
 		//Parse the body params
 		$bodies         = "";
@@ -181,7 +181,7 @@ function wp_webhooks_hit_url_callback($url,$bodies,$headers) {
 				}
 			}
 		}
-		
+
 		$bodiescount = count($bodieskey);
 		for($i=0;$i<$bodiescount;$i++){
 			if($bodieskey[$i] != ""){
@@ -192,20 +192,20 @@ function wp_webhooks_hit_url_callback($url,$bodies,$headers) {
 				}
 			}
 		}
-		
+
 		if($request["method"] == "DELETE"){
 		  $bodies = $bodies;
 	  }
-	}else{ 
+	}else{
 		$bodies = json_decode(stripslashes(trim(preg_replace('/\s+/', ' ',$request["body-raw-value"]))),true);
 	}
-	
+
 	$bodyarray = json_encode(array("form-data" => $request["formdata_type"],"get" => $urlparams,"post" => $bodies));
 
 	/*$querystring = !empty($urlparams) ? "?".http_build_query($urlparams) : "";
 	$url        = $_REQUEST["url"].$querystring;
 	$ch         = curl_init();
-	
+
 	// set url
 	curl_setopt($ch, CURLOPT_URL, $url);
 	//return the transfer as a string
@@ -216,17 +216,17 @@ function wp_webhooks_hit_url_callback($url,$bodies,$headers) {
 	curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
 	curl_setopt($ch, CURLOPT_HEADER, true);
 	curl_setopt($ch, CURLOPT_CUSTOMREQUEST, $request["method"]);
-	
+
 	//print_r($bodies);exit;
 	if(isset($bodies) && $bodies != ''){
 		curl_setopt($ch, CURLOPT_POSTFIELDS, $bodies);
 	}
-	
+
 	// $output contains the output string
 	$output = curl_exec($ch);
 	$getinfo = curl_getinfo($ch);
 	curl_close($ch);
-	
+
 	$response = explode("\r\n\r\n", $output, 2);
 	$returnHeader = json_encode(get_headers_from_curl_response($response[0]));
 	$returnBody   = $response[1];
@@ -235,7 +235,7 @@ function wp_webhooks_hit_url_callback($url,$bodies,$headers) {
 		//$responseArray = array("header" => $returnHeader,"body" => $returnBody);
 		if(!empty($id)){
 			if($wpdb->update($wpdb->prefix."webhooks",
-			              array('hook_for'  => stripslashes($_POST['hook_for']), 
+			              array('hook_for'  => stripslashes($_POST['hook_for']),
 												 'call_type'  => stripslashes($_POST['method']),
 												 'url'        => stripslashes($_POST['url']),
 												 'data'       => stripslashes($bodyarray),
@@ -243,7 +243,7 @@ function wp_webhooks_hit_url_callback($url,$bodies,$headers) {
 												 //'response'   => json_encode($responseArray),
 												 'applied_on' => implode(",",$request["applied_on"]),
 												),
-										array( 'id' => $id ) 
+										array( 'id' => $id )
 										)){
 											echo "success";
 										}else{
@@ -251,15 +251,15 @@ function wp_webhooks_hit_url_callback($url,$bodies,$headers) {
 										}
 		}else{
 		//Insert hook data to table
-		if($wpdb->insert( $wpdb->prefix."webhooks", 
-		               array('hook_for'   => stripslashes($_POST['hook_for']), 
+		if($wpdb->insert( $wpdb->prefix."webhooks",
+		               array('hook_for'   => stripslashes($_POST['hook_for']),
 												 'call_type'  => stripslashes($_POST['method']),
 												 'url'        => stripslashes($_POST['url']),
 												 'data'       => stripslashes($bodyarray),
 												 'headers'    => stripslashes(json_encode($headers)),
 												 //'response'   => json_encode($responseArray),
 												 'applied_on' => implode(",",$request["applied_on"]),
-												) 
+												)
 								 )){
 									 echo "success";
 								 }else{
@@ -270,7 +270,7 @@ function wp_webhooks_hit_url_callback($url,$bodies,$headers) {
   /*$message    = "";
 	$message[0] = $returnHeader;
 	$message[1] = $returnBody;
-	
+
 	echo implode("||||",$message);*/
 	do_action ( "wp_webhooks_hit_url_callbacksas" );
 	die();
@@ -278,121 +278,123 @@ function wp_webhooks_hit_url_callback($url,$bodies,$headers) {
 
 
 //Hook function for post/page call
-function wp_webhooks_get_post_page() {
-  global $wpdb; // this is how you get access to the database
-	//$form = json_decode($_REQUEST["form"]);
-	$request = $_REQUEST;
-	$resultdata    = $wpdb->get_results("SELECT * FROM ".$wpdb->prefix."webhooks WHERE hook_for = '".$request["post_type"]."' and status=1 and delete_status=0",ARRAY_A);
-	foreach($resultdata as $postdata){
-		$applied = explode(",",$postdata["applied_on"]);
-    if(in_array($request["post_status"],$applied) or empty($postdata["applied_on"])){
-			$data        = json_decode($postdata["data"],true);
-			$method      = strtoupper($postdata["call_type"]);
-			$headerdata  = json_decode($postdata["headers"],true);
-			
-			$bodyGetData  = $data["get"];
-			$bodyPostData = $data["post"];
-			//Parse the url params
-			$urlparams  = "";
-			
-			if(!empty($bodyGetData)){
-				foreach($bodyGetData as $bodygetkey => $bodygetvalue){
-					if (strpos($bodygetvalue, '%%') !== false) {
-						$val   = trim(str_replace("%%","",$bodygetvalue));
-						$value = $_REQUEST[$val];
-						$data["data"]["get"][$bodygetkey] = $value;
-					}else{
-						$data["data"]["get"][$bodygetkey] = $bodygetvalue;
-					}
-				}
-				$urlparams = $data["data"]["get"];
-			}
-			
-			$bodyparams  = "";
-			
-			if(!empty($bodyPostData)){
-				foreach($bodyPostData as $bodypostkey => $bodypostvalue){
-					if(is_array($bodypostvalue)){
-						foreach($bodypostvalue as $pkey => $pval)
-						if (strpos($$pval, '%%') !== false) {
-							$val   = trim(str_replace("%%","",$$pval));
-							$value = $_REQUEST[$val];
-							$data["data"]["post"][$bodypostkey][$pkey] = $value;
-						}else{
-							$data["data"]["post"][$bodypostkey][$pkey] = $pval;
-						}
-						//$data["data"]["post"][$bodypostkey] = "[".implode(",",$data["data"]["post"][$bodypostkey])."]	";
-						$bodyparams = $data["data"]["post"];
-						if($method == "POST"){
-							$bodyparams = $bodyparams;
-						}
-					}else{
-						if (strpos($bodypostvalue, '%%') !== false) {
-							$val   = trim(str_replace("%%","",$bodypostvalue));
-							$value = $_REQUEST[$val];
-							$data["data"]["post"][$bodypostkey] = $value;
-						}else{
-							$data["data"]["post"][$bodypostkey] = $bodypostvalue;
-						}
-						$bodyparams = $data["data"]["post"];
-						if($method == "POST"){
-							$bodyparams = $bodyparams;
-						}
-					}
-				}
-			}
-			/*if(isMultiArray($bodyparams)){
-				//$bodyparams = http_build_query($bodyparams);
-			}*/
-			/*echo "<pre>";
-			print_r(json_encode($bodyparams));
-			exit;*/
-			//Parse the header params
-			$headers = "";
-			if(!empty($headerdata)){
-				foreach($headerdata as $headerkey => $headdervalue){
-					$headers[$headerkey] = $headdervalue;
-				}
-			}
+function wp_webhooks_get_post_page($post_ID, $post_after, $post_before) {
+	if($post_after->post_status == 'publish'){
+	  global $wpdb; // this is how you get access to the database
+		//$form = json_decode($_REQUEST["form"]);
+		$request = $_REQUEST;
+		$resultdata    = $wpdb->get_results("SELECT * FROM ".$wpdb->prefix."webhooks WHERE hook_for = '".$request["post_type"]."' and status=1 and delete_status=0",ARRAY_A);
+		foreach($resultdata as $postdata){
+			$applied = explode(",",$postdata["applied_on"]);
+	    if(in_array($request["post_status"],$applied) or empty($postdata["applied_on"])){
+				$data        = json_decode($postdata["data"],true);
+				$method      = strtoupper($postdata["call_type"]);
+				$headerdata  = json_decode($postdata["headers"],true);
 
-			$querystring = !empty($urlparams) ? "?".http_build_query($urlparams) : "";
-			$url         = $postdata["url"].$querystring;
-			$ch          = curl_init();
-			// set url
-			curl_setopt($ch, CURLOPT_URL, $url);
-			//return the transfer as a string
-			curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-			curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
-			//$headers[] = 'client_id: wpweb';
-			//$headers[] = 'client_secret: 5dfe726a08c37e7dab97f6d02041766ca6008a24231c3797bf94761a90a19d7b';
-			curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
-			curl_setopt($ch, CURLOPT_HEADER, true);
-			curl_setopt($ch, CURLOPT_CUSTOMREQUEST, $method);
-			curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($bodyparams));
-			
-			// $output contains the output string
-			$output  = curl_exec($ch);
-			$getinfo = curl_getinfo($ch);
-			curl_close($ch);
-			$response     = explode("\r\n\r\n", $output, 2);
-			$returnHeader = json_encode(get_headers_from_curl_response($response[0]));
-			$returnBody   = $response[1];
-			
-			//Insert hook data to table
-			$wpdb->insert( $wpdb->prefix."webhooks_logs", 
-										 array(
-													 'hook_id'        => stripslashes($postdata['id']),
-													 'post_id'        => stripslashes($request["post_ID"]),
-													 'post_type'      => stripslashes($request["post_type"]),
-													 'response_code'  => stripslashes($getinfo["http_code"]),
-													 'date_added'     => date("Y-m-d H:i:s"),
-													 'response'       => $output,
-													) 
-										);
+				$bodyGetData  = $data["get"];
+				$bodyPostData = $data["post"];
+				//Parse the url params
+				$urlparams  = "";
+
+				if(!empty($bodyGetData)){
+					foreach($bodyGetData as $bodygetkey => $bodygetvalue){
+						if (preg_match_all('/(?<=%%).*?(?=%%)/', $bodygetvalue, $matches)) {
+							foreach($matches[0] as $match){
+								$value = trim(str_replace("%%".$match."%%",$_REQUEST[$match],$bodygetvalue));
+								$data["data"]["get"][$bodygetkey] = $value;
+							}
+						}else{
+							$data["data"]["get"][$bodygetkey] = $bodygetvalue;
+						}
+					}
+					$urlparams = $data["data"]["get"];
+				}
+
+				$bodyparams  = "";
+
+				if(!empty($bodyPostData)){
+					foreach($bodyPostData as $bodypostkey => $bodypostvalue){
+						if(is_array($bodypostvalue)){
+							foreach($bodypostvalue as $pkey => $pval){
+								if (preg_match_all('/(?<=%%).*?(?=%%)/', $pval, $matches)) {
+									foreach($matches[0] as $match){
+										$value = trim(str_replace("%%".$match."%%",$_REQUEST[$match],$pval));
+										$data["data"]["post"][$bodypostkey][$pkey] = $value;
+									}
+								}else {
+								  $data["data"]["post"][$bodypostkey][$pkey] = $pval;
+								}
+								$bodyparams = $data["data"]["post"];
+								if($method == "POST"){
+									$bodyparams = $bodyparams;
+								}
+							}
+						}else{
+							if (preg_match_all('/(?<=%%).*?(?=%%)/', $bodypostvalue, $matches)) {
+								foreach($matches[0] as $match){
+									$value = trim(str_replace("%%".$match."%%",$_REQUEST[$match],$bodypostvalue));
+									$data["data"]["post"][$bodypostkey] = $value;
+								}
+							}else{
+								$data["data"]["post"][$bodypostkey] = $bodypostvalue;
+							}
+							$bodyparams = $data["data"]["post"];
+							if($method == "POST"){
+								$bodyparams = $bodyparams;
+							}
+						}
+					}
+				}
+				
+				//Parse the header params
+				$headers = "";
+				if(!empty($headerdata)){
+					foreach($headerdata as $headerkey => $headdervalue){
+						$headers[$headerkey] = $headdervalue;
+					}
+				}
+
+				$querystring = !empty($urlparams) ? "?".http_build_query($urlparams) : "";
+				$url         = $postdata["url"].$querystring;
+				$ch          = curl_init();
+				// set url
+				curl_setopt($ch, CURLOPT_URL, $url);
+				//return the transfer as a string
+				curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+				curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+				//$headers[] = 'client_id: wpweb';
+				//$headers[] = 'client_secret: 5dfe726a08c37e7dab97f6d02041766ca6008a24231c3797bf94761a90a19d7b';
+	      if($headers){
+				  curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+			  }
+				curl_setopt($ch, CURLOPT_HEADER, true);
+				curl_setopt($ch, CURLOPT_CUSTOMREQUEST, $method);
+				curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($bodyparams));
+
+				// $output contains the output string
+				$output  = curl_exec($ch);
+				$getinfo = curl_getinfo($ch);
+				curl_close($ch);
+				$response     = explode("\r\n\r\n", $output, 2);
+				$returnHeader = json_encode(get_headers_from_curl_response($response[0]));
+				$returnBody   = $response[1];
+
+				//Insert hook data to table
+				$wpdb->insert( $wpdb->prefix."webhooks_logs",
+											 array(
+														 'hook_id'        => stripslashes($postdata['id']),
+														 'post_id'        => stripslashes($request["post_ID"]),
+														 'post_type'      => stripslashes($request["post_type"]),
+														 'response_code'  => stripslashes($getinfo["http_code"]),
+														 'date_added'     => date("Y-m-d H:i:s"),
+														 'response'       => $output,
+														)
+											);
+			}
 		}
+		return true;
+		//die();
 	}
-	return true;
-	//die();
 }
 
 //Check for multidimensional array
@@ -418,7 +420,7 @@ function get_headers_from_curl_response($response)
     return $headers;
 }
 //Custom hooh when performing action with post/page
-add_action( 'transition_post_status', 'wp_webhooks_get_post_page', 10,3 );
+add_action( 'post_updated', 'wp_webhooks_get_post_page', 10,3 );
 
 function response_codes($code)
 {
@@ -503,7 +505,7 @@ function wp_webhooks_activate() {
 		ADD PRIMARY KEY (`id`);");
 	$wpdb->query("ALTER TABLE ".$wpdb->prefix."webhooks
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;");
-	
+
 	//Create logs table
 	$query = "CREATE TABLE ".$wpdb->prefix."webhooks_logs (
 		`id` int(11) NOT NULL,

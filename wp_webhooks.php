@@ -298,12 +298,11 @@ function wp_webhooks_get_post_page($post_ID, $post_after, $post_before) {
 
 				if(!empty($bodyGetData)){
 					foreach($bodyGetData as $bodygetkey => $bodygetvalue){
-						if (($pos =  strpos($bodygetvalue, '%%')) !== false) {
-							$whatIWant = substr($bodygetvalue, $pos);
-							$val   = trim(str_replace("%%","",$whatIWant));
-							$val   = trim(str_replace("/","",$val));
-							$value = trim(str_replace("%%".$val."%%",$_REQUEST[$val],$bodygetvalue));
-							$data["data"]["get"][$bodygetkey] = $value;
+						if (preg_match_all('/(?<=%%).*?(?=%%)/', $bodygetvalue, $matches)) {
+							foreach($matches[0] as $match){
+								$value = trim(str_replace("%%".$match."%%",$_REQUEST[$match],$bodygetvalue));
+								$data["data"]["get"][$bodygetkey] = $value;
+							}
 						}else{
 							$data["data"]["get"][$bodygetkey] = $bodygetvalue;
 						}
@@ -317,28 +316,25 @@ function wp_webhooks_get_post_page($post_ID, $post_after, $post_before) {
 					foreach($bodyPostData as $bodypostkey => $bodypostvalue){
 						if(is_array($bodypostvalue)){
 							foreach($bodypostvalue as $pkey => $pval){
-								if (($pos = strpos($pval, '%%')) !== false) {
-									$whatIWant = substr($pval, $pos);
-									$val   = trim(str_replace("%%","",$whatIWant));
-									$val   = trim(str_replace("/","",$val));
-									$value = trim(str_replace("%%".$val."%%",$_REQUEST[$val],$pval));
-									$data["data"]["post"][$bodypostkey][$pkey] = $value;
-								}else{
-									$data["data"]["post"][$bodypostkey][$pkey] = $pval;
+								if (preg_match_all('/(?<=%%).*?(?=%%)/', $pval, $matches)) {
+									foreach($matches[0] as $match){
+										$value = trim(str_replace("%%".$match."%%",$_REQUEST[$match],$pval));
+										$data["data"]["post"][$bodypostkey][$pkey] = $value;
+									}
+								}else {
+								  $data["data"]["post"][$bodypostkey][$pkey] = $pval;
 								}
-								//$data["data"]["post"][$bodypostkey] = "[".implode(",",$data["data"]["post"][$bodypostkey])."]	";
 								$bodyparams = $data["data"]["post"];
 								if($method == "POST"){
 									$bodyparams = $bodyparams;
 								}
 							}
 						}else{
-							if (($pos = strpos($bodypostvalue, '%%')) !== false) {
-								$whatIWant = substr($bodypostvalue, $pos);
-								$val   = trim(str_replace("%%","",$whatIWant));
-								$val   = trim(str_replace("/","",$val));
-								$value = trim(str_replace("%%".$val."%%",$_REQUEST[$val],$bodypostvalue));
-								$data["data"]["post"][$bodypostkey] = $value;
+							if (preg_match_all('/(?<=%%).*?(?=%%)/', $bodypostvalue, $matches)) {
+								foreach($matches[0] as $match){
+									$value = trim(str_replace("%%".$match."%%",$_REQUEST[$match],$bodypostvalue));
+									$data["data"]["post"][$bodypostkey] = $value;
+								}
 							}else{
 								$data["data"]["post"][$bodypostkey] = $bodypostvalue;
 							}
@@ -349,13 +345,7 @@ function wp_webhooks_get_post_page($post_ID, $post_after, $post_before) {
 						}
 					}
 				}
-				//print_r($bodyparams);
-				/*if(isMultiArray($bodyparams)){
-					//$bodyparams = http_build_query($bodyparams);
-				}*/
-				/*echo "<pre>";
-				print_r(json_encode($bodyparams));
-				exit;*/
+
 				//Parse the header params
 				$headers = "";
 				if(!empty($headerdata)){
